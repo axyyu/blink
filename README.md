@@ -7,14 +7,6 @@ Blink is a traffic model.
 
 ## Python3 Virtualenv Setup
 
-#### Requirements
-* Python 3
-* Pip 3
-
-```bash
-$ brew install python3
-```
-
 #### Installation
 To install virtualenv via pip run:
 ```bash

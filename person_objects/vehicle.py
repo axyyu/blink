@@ -5,10 +5,11 @@ Determines car position and probable destination
 
 """
 from dependencies import *
+from input_objects import destination_control
 
 class Vehicle():
     def __init__(self):
-        self.id = uuid.uuid4() # or licence plate number
+        self.id = uuid.uuid4()
         self.current_lane = -1
         self.projected_destinations = set()
         self.movement_history = []
@@ -17,9 +18,7 @@ class Vehicle():
     Calculate the remaining possible destinations using the movement history
     """
     def update_destinations(self):
-        # all_intersections = []
-        for m in self.movement_history:
-            self.projected_destinations.discard(m)
+        destination_control.vehicle_destinations(self.movement_history, self.current_lane, self.projected_destinations)
 
     """
     Move to new lane and update
