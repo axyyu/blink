@@ -1,74 +1,52 @@
 from dependencies import *
 from person_objects import *
 from road_objects import *
+from pprint import pprint
 
-colors = colors.Colors()
+"""
+For Simulation Purposes
+"""
+tick = queue.Queue()
+road_network = {}
 
 """
 Helper
 """
-def displayNetwork(road_network):
+def display_network(road_network):
     for rid in road_network:
         # print("\n{}{}{}".format(colors.PURPLE + colors.BOLD, rid, colors.ENDC))
         cprint("\n{}".format(rid), 'magenta', attrs=['bold'])
         for iid in road_network[rid].intersections:
-            print("\n---> {}{}{}".format(colors.GREEN, iid, colors.ENDC))
-            print("-------> {}Entering Lanes{}".format(colors.UNDERLINE, colors.ENDC))
-            for slid in road_network[rid].intersections[iid].startLanes:
-                print("-------> {}{}{}".format(colors.BLUE,slid, colors.ENDC))
-            print("-------> {}Exiting Lanes{}".format(colors.UNDERLINE, colors.ENDC))
-            for elid in road_network[rid].intersections[iid].endLanes:
-                if road_network[rid].intersections[iid].endLanes[elid].ped:
-                    print("-------> {}{}{}".format(colors.BLUE + colors.BOLD,elid,colors.ENDC))
-                print("-------> {}{}{}".format(colors.BLUE,elid,colors.ENDC))
+            pass
 
 """
-Generate road networks
+Input Road Network
 """
+def create_network():
+    content = []
+    with open(sys.argv[1], 'r') as f:
+        content = f.readlines()
 
-"""
-Randomly generates road network
-1 Region
-3-5 Intersections
-2-3 Lanes To Each Intersection
-"""
-def randomly_generate():
-    # road_network = {}
-    root = Region()
-    road_network = {root.id:root}
+    for c in content:
+        b = c.lstrip().rstrip()
+        if(b[0] == "#"):
+            region = Region(tick, b[1:])
+            if region.name not in road_network:
+                road_network[region.name] = region
+        if(b[0] == "-"):
+            intersection = Intersection(tick, b[1:], region.id, region.com)
+            if intersection.name not in road_network:
+                road_network[intersection.name] = intersection
+        if(b[0] == "*"):
+            road_info = b[1:].split(",")
+            int1, int2 = road_info[1].split("-")
 
-    for i in range(random.randint(3,5)):
-        int_obj = Intersection(root.id)
-        int_id = int_obj.id
-        root.intersections[int_id] = int_obj
+            road = Road(tick, road_info[0])
+            road_network[int1].attach_road(road)
+            road_network[int2].attach_road(road)
 
-    #Vehicle Lanes
-    l_est = len(root.intersections)*4
-    for l in range(l_est): 
-        start = random.choice( list(root.intersections.keys()) )
-        end = start
-        while end == start:
-            end = random.choice( list(root.intersections.keys()) )
+            if road.name not in road_network:
+                road_network[road.name] = road
 
-        lane_obj = Lane(root.id, start, end)
-        root.intersections[start].startLanes[lane_obj.id] = lane_obj
-        root.intersections[end].endLanes[lane_obj.id] = lane_obj
-
-    #Pedestrian Lanes
-    l_est = len(root.intersections)*2
-    for l in range(l_est): 
-        start = random.choice( list(root.intersections.keys()) )
-        end = start
-        while end == start:
-            end = random.choice( list(root.intersections.keys()) )
-
-        lane_obj = Lane(root.id, start, end, True)
-        root.intersections[start].startLanes[lane_obj.id] = lane_obj
-        root.intersections[end].endLanes[lane_obj.id] = lane_obj
-
-    return road_network
-
-road_network = randomly_generate()
-displayNetwork(road_network)
-# road_network[0].start()
-# regions[0].start()
+create_network()
+pprint(road_network)
