@@ -14,6 +14,9 @@ class Vehicle():
         self.projected_destinations = set()
         self.movement_history = []
 
+    def __str__(self):
+        return self.id
+
     """
     Calculate the remaining possible destinations using the movement history
     """
@@ -27,3 +30,10 @@ class Vehicle():
         self.movement_history.append(self.current_lane)
         self.current_lane = end
         self.update_destinations()
+
+    """
+    For testing purposes
+    Should never be used in simulation
+    """
+    def __gt__(self, other):
+        return self.id > other.id

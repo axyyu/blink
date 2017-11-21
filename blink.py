@@ -21,6 +21,7 @@ def display_network(road_network):
 
 """
 Input Road Network
+Generates the network based on the file input
 """
 def create_network():
     content = []
@@ -31,22 +32,37 @@ def create_network():
         b = c.lstrip().rstrip()
         if(b[0] == "#"):
             region = Region(tick, b[1:])
-            if region.name not in road_network:
-                road_network[region.name] = region
+            road_network[region.name] = region
         if(b[0] == "-"):
             intersection = Intersection(tick, b[1:], region.id, region.com)
-            if intersection.name not in road_network:
-                road_network[intersection.name] = intersection
+            road_network[intersection.name] = intersection
         if(b[0] == "*"):
             road_info = b[1:].split(",")
-            int1, int2 = road_info[1].split("-")
 
-            road = Road(tick, road_info[0])
-            road_network[int1].attach_road(road)
-            road_network[int2].attach_road(road)
+            road = Road(tick, road_info[0], int(road_info[3]), int(road_info[4]))
+            if road_info[0] not in road_network:
+                road_network[road_info[0]] = []
+            road_network[road_info[0]].append(road)
+            
+            road_network[road_info[2].rstrip()].attach_input_road(road)
+            road_network[road_info[1].rstrip()].attach_exit(road)
 
-            if road.name not in road_network:
-                road_network[road.name] = road
+            print()
+            pprint(road_info)
+            print("In:\t" )
+            pprint(road_network['Int1'].input_road)
+            print("Out:\t" )
+            pprint(road_network['Int1'].exit)
+
+"""
+Initialize Network
+Starts all the threads
+"""
+def init_network():
+    pass
+def run_network():
+    pass
 
 create_network()
-pprint(road_network)
+init_network()
+# pprint(road_network)
