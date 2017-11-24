@@ -40,6 +40,7 @@ def create_network():
             road_info = b[1:].split(",")
 
             road = Road(tick, road_info[0], int(road_info[3]), int(road_info[4]))
+
             if road_info[0] not in road_network:
                 road_network[road_info[0]] = []
             road_network[road_info[0]].append(road)
@@ -47,12 +48,6 @@ def create_network():
             road_network[road_info[2].rstrip()].attach_input_road(road)
             road_network[road_info[1].rstrip()].attach_exit(road)
 
-            print()
-            pprint(road_info)
-            print("In:\t" )
-            pprint(road_network['Int1'].input_road)
-            print("Out:\t" )
-            pprint(road_network['Int1'].exit)
 
 """
 Initialize Network
