@@ -43,7 +43,7 @@ def create_network():
             if road_info[0] not in road_network:
                 road_network[road_info[0]] = []
             road_network[road_info[0]].append(road)
-            
+
             road_network[road_info[2].rstrip()].attach_input_road(road)
             road_network[road_info[1].rstrip()].attach_exit(road)
 
@@ -65,4 +65,4 @@ def run_network():
 
 create_network()
 init_network()
-# pprint(road_network)
+print(road_network)

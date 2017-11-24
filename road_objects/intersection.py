@@ -20,6 +20,9 @@ class Intersection(threading.Thread):
         self.input_road = [0 for d in range(directions)]
         self.exit = [0 for d in range(directions)]
 
+        self.lights = ["red" for d in range(directions)]
+        self.cycleTimes = [10,10,10,10]
+        self.effCycleTimes = [sum(self.cycleTimes[0,x+1]) for x in range(len(self.cycleTimes))]
     def __str__(self):
         return self.name
 
@@ -50,7 +53,7 @@ class Intersection(threading.Thread):
             if dir < len(self.input_road):
                 temp = self.input_road.pop(dir)
                 self.input_road.append(temp)
-            
+
             self.input_road.insert(dir, road)
         else:
             for d in range(len(self.exit)):
@@ -70,10 +73,26 @@ class Intersection(threading.Thread):
             if dir < len(self.exit):
                 temp = self.exit.pop(dir)
                 self.exit.append(temp)
-            
+
             self.exit.insert(dir, road)
         else:
             for d in range(len(self.exit)):
                 if self.exit[d] == 0:
                     self.exit[d] = road
                     break
+        """
+        Light management
+        """
+        def updateCycles(self, tick):
+            currentCycle = tick%sum(self.cycleTimes)
+            for x in range(self.effCycleTimes):
+                if(currentCycle<self.effCycleTimes[x]):
+                    currentGreenLight = self.lights[x]
+            return currentGreenLight
+
+        def changeCycleTimes(self, newLights):
+            self.cycleTimes = newLights
+            self.effCycleTimes = [sum(self.cycleTimes[0,x+1]) for x in range(len(self.cycleTimes))]]
+
+        def createLightMap(self, road_network):
+            print(road_network)
