@@ -20,3 +20,8 @@ class Region(threading.Thread):
 
     def __repr__(self):
         return self.name
+
+    def run(self):
+        while True:
+            tick = self.tick.get()
+            cprint("\t{}".format(tick),"magenta")

@@ -26,6 +26,11 @@ class Intersection(threading.Thread):
     def __repr__(self):
         return self.name
 
+    def run(self):
+        while True:
+            tick = self.tick.get()
+            cprint("\t{}".format(tick),"blue")
+
     """
     Attaching Roads
     Attempts to find a road in the opposite direction thats already been attached
@@ -37,6 +42,9 @@ class Intersection(threading.Thread):
             if road_list[r] and road.name == road_list[r].name:
                 ind = r
         return ind
+
+    def attach_road(self, road, road_list, check_list):
+        pass
 
     def attach_input_road(self,road):
         if road in self.input_road:
