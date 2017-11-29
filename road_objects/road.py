@@ -5,15 +5,13 @@ Road Object
 from dependencies import *
 
 class Road(queue.PriorityQueue):
-    def __init__(self, tick, name, length=20, capacity=20):
+    def __init__(self, name, length=20, capacity=20):
         queue.PriorityQueue.__init__(self,capacity)
 
         self.id = uuid.uuid4()
         self.name = name
         self.length = length
         self.capacity = capacity
-
-        self.tick = tick
 
     def __str__(self):
         return self.name
