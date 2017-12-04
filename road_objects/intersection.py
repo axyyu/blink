@@ -16,23 +16,30 @@ class Intersection(threading.Thread):
         self.directions = directions
 
         self.tick = tick
+        self.inner_tick = 0
         self.com = queue.Queue()
-        self.input_road = [0 for d in range(directions)]
-        self.exit = [0 for d in range(directions)]
+        self.input_road = [False for d in range(directions)]
+        self.exit_road = [False for d in range(directions)]
 
-        self.lights = ["red" for d in range(directions)]
-        self.cycleTimes = [10,10,10,10]
-        self.effCycleTimes = [sum(self.cycleTimes[0,x+1]) for x in range(len(self.cycleTimes))]
+        self.lights = [False for d in range(directions)]
+        self.cycle_times = [10 for d in range(directions)]
+        self.current_cycle = 0
+    
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return self.name
 
+    def init(self):
+        self.initLights()
+        self.start()
+
     def run(self):
         while True:
             tick = self.tick.get()
-            cprint("\t{}".format(tick),"blue")
+            self.updateLights(tick)
+            cprint("\t{}\t{}".format(self.name, self.lights),"blue")
 
     """
     Attaching Roads
@@ -42,74 +49,57 @@ class Intersection(threading.Thread):
     def search(self, road, road_list):
         ind = -1
         for r in range(len(road_list)):
-            if road_list[r] and road.name == road_list[r].name:
+            if road_list[r] and road.id == road_list[r].id:
                 ind = r
         return ind
 
-    def attach_road(self, road, road_list, check_list):
-        pass
+    def attach_road(self, option, road):
+        if option:
+            self.add_road(road, self.input_road, self.exit_road)
+        else:
+            self.add_road(road, self.exit_road, self.input_road)
 
-    def attach_input_road(self,road):
-        if road in self.input_road:
-            cprint("WARNING: Attempted to add preexisting input road to intersection.",'yellow')
+    def add_road(self,road, one, two):
+        if road in one:
+            cprint("WARNING: Attempted to add preexisting road to intersection.",'yellow')
             return
         
-        dir = self.search(road, self.exit)
+        dir = self.search(road, two)
         if dir > -1:
             temp = None
-            if dir < len(self.input_road):
-                temp = self.input_road.pop(dir)
-                self.input_road.append(temp)
-
-            self.input_road.insert(dir, road)
-        else:
-            for d in range(len(self.exit)):
-                if self.input_road[d] == 0:
-                    self.input_road[d] = road
-                    break
-
-    def attach_exit(self, road):
-        if road in self.exit:
-            cprint("WARNING: Attempted to add preexisting exit road to intersection.",'yellow')
-            return
-        
-        dir = self.search(road, self.input_road)
-        if dir > -1:
-
-            temp = None
-            if dir < len(self.exit):
-                temp = self.exit.pop(dir)
-                self.exit.append(temp)
-
-            self.exit.insert(dir, road)
-        else:
-            for d in range(len(self.exit)):
-                if self.exit[d] == 0:
-                    self.exit[d] = road
-                    break
-        """
-        Light management
-        """
-        def updateCycles(self, tick):
-            currentCycle = tick%sum(self.cycleTimes)
-            for x in range(self.effCycleTimes):
-                if(currentCycle<self.effCycleTimes[x]):
-                    currentGreenLight = self.lights[x]
-            return currentGreenLight
-
-        def changeCycleTimes(self, newLights):
-            self.cycleTimes = newLights
-            self.effCycleTimes = [sum(self.cycleTimes[0,x+1]) for x in range(len(self.cycleTimes))]]
-
-        def createLightMap(self, road_network):
-            print(road_network)
-
-                self.exit.insert(dir, road)
+            if dir < len(one):
+                temp = one.pop(dir)
+                one.insert(dir, road)
                 road = temp
-
+                
             return
-
-        for d in range(len(self.exit)):
-            if self.exit[d] == 0:
-                self.exit[d] = road
+        
+        for d in range(len(one)):
+            if one[d] == 0:
+                one[d] = road
                 break
+
+    """
+    Light management
+    """
+    """
+    def updateCycles(self, tick):
+        currentCycle = tick%sum(self.cycleTimes)
+        for x in range(self.effCycleTimes):
+            if(currentCycle<self.effCycleTimes[x]):
+                currentGreenLight = self.lights[x]
+        return currentGreenLight
+
+    def changeCycleTimes(self, newLights):
+        self.cycleTimes = newLights
+        self.effCycleTimes = [sum(self.cycleTimes[0,x+1]) for x in range(len(self.cycleTimes))]
+    """
+    def initLights(self):
+        self.lights = [1 if a != 0 else False for a in self.input_road]
+        self.cycle_times = [10 if a > -1 else False for a in self.lights ]
+
+    def updateLights(self, tick):
+        print(self.input_road)
+        print(self.exit_road)
+        # one = self.lights.index(1)
+        # two = one + int(self.directions/2)

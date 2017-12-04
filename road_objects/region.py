@@ -21,6 +21,9 @@ class Region(threading.Thread):
     def __repr__(self):
         return self.name
 
+    def init(self):
+        self.start()
+
     def run(self):
         while True:
             tick = self.tick.get()

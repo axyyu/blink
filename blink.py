@@ -6,7 +6,7 @@ from pprint import pprint
 """
 For Simulation Purposes
 """
-tick = 0;
+tick = 0
 road_network = {}
 
 """
@@ -34,24 +34,25 @@ def create_network():
 
     for c in content:
         b = c.lstrip().rstrip()
-        if(b[0] == "#"):
+        if len(b) <= 0:
+            continue
+        if b[0] == "#":
             region = Region(queue.Queue(), b[1:])
             road_network[region.name] = region
-        if(b[0] == "-"):
+        if b[0] == "-":
             intersection = Intersection(queue.Queue(), b[1:], region.id, region.com)
             road_network[intersection.name] = intersection
-        if(b[0] == "*"):
+        if b[0] == "*":
             road_info = b[1:].split(",")
+            pprint(road_info)
+            for r in range(len(road_info[1:-3])):
+                road = Road(road_info[0], road_info[r+2], road_info[r+1], int(road_info[-2]), int(road_info[-1]))
+                road_network[road_info[r+1].rstrip()].attach_road(True, road)
+                road_network[road_info[r+2].rstrip()].attach_road(False, road)
 
-            road = Road(road_info[0], int(road_info[3]), int(road_info[4]))
-
-            #if road_info[0] not in road_network:
-                #road_network[road_info[0]] = []
-            #road_network[road_info[0]].append(road)
-
-            road_network[road_info[2].rstrip()].attach_input_road(road)
-            road_network[road_info[1].rstrip()].attach_exit(road)
-
+                road = Road(road_info[0], road_info[r+1], road_info[r+2], int(road_info[-2]), int(road_info[-1]))
+                road_network[road_info[r+2].rstrip()].attach_road(True, road)
+                road_network[road_info[r+1].rstrip()].attach_road(False, road)
 
 """
 Initialize Network
@@ -59,7 +60,8 @@ Starts all the threads
 """
 def init_network():
     for k in road_network:
-        road_network[k].start()
+        road_network[k].init()
+
 def run_network():
     global tick
     while True:
@@ -75,4 +77,7 @@ def run_network():
 check_input()
 create_network()
 init_network()
-run_network()
+# run_network()
+pprint(road_network["IntC"].input_road)
+pprint(road_network["IntC"].exit_road)
+pprint(road_network["IntC"].lights)
