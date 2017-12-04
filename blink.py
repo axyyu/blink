@@ -44,7 +44,7 @@ def create_network():
             road_network[intersection.name] = intersection
         if b[0] == "*":
             road_info = b[1:].split(",")
-            pprint(road_info)
+            # pprint(road_info)
             for r in range(len(road_info[1:-3])):
                 road = Road(road_info[0], road_info[r+2], road_info[r+1], int(road_info[-2]), int(road_info[-1]))
                 road_network[road_info[r+1].rstrip()].attach_road(True, road)
@@ -67,6 +67,7 @@ def run_network():
     while True:
         count = threading.active_count()
         cprint("\nActive Threads: {}\n".format(threading.active_count()),"green")
+        cprint("\t{}".format(tick),"magenta")
 
         for k in road_network:
             road_network[k].tick.put(tick)
@@ -77,7 +78,7 @@ def run_network():
 check_input()
 create_network()
 init_network()
-# run_network()
-pprint(road_network["IntC"].input_road)
-pprint(road_network["IntC"].exit_road)
-pprint(road_network["IntC"].lights)
+run_network()
+# pprint(road_network["IntC"].input_road)
+# pprint(road_network["IntC"].exit_road)
+# pprint(road_network["IntC"].lights)

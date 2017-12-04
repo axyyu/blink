@@ -32,13 +32,15 @@ class Intersection(threading.Thread):
         return self.name
 
     def init(self):
-        self.initLights()
+        self.init_lights()
+        self.directions = sum(self.lights)
         self.start()
 
     def run(self):
         while True:
             tick = self.tick.get()
-            self.updateLights(tick)
+            self.inner_tick+=1
+            self.update_lights()
             cprint("\t{}\t{}".format(self.name, self.lights),"blue")
 
     """
@@ -94,12 +96,26 @@ class Intersection(threading.Thread):
         self.cycleTimes = newLights
         self.effCycleTimes = [sum(self.cycleTimes[0,x+1]) for x in range(len(self.cycleTimes))]
     """
-    def initLights(self):
+    def init_lights(self):
         self.lights = [1 if a != 0 else False for a in self.input_road]
-        self.cycle_times = [10 if a > -1 else False for a in self.lights ]
+        self.cycle_times = [5 if a > -1 else False for a in self.lights ]
 
-    def updateLights(self, tick):
-        print(self.input_road)
-        print(self.exit_road)
-        # one = self.lights.index(1)
-        # two = one + int(self.directions/2)
+    def update_lights(self):
+        if self.inner_tick > self.cycle_times[self.current_cycle]:
+            self.inner_tick = 0
+            new_cycle = int( (self.current_cycle + self.directions/2)% self.directions)
+            self.switch_lights(self.current_cycle, new_cycle)
+            self.current_cycle = new_cycle
+        elif self.inner_tick == self.cycle_times[self.current_cycle]:
+            self.change_light(self.current_cycle, 1)
+            self.change_light(self.current_cycle+1, 1)
+            
+    def switch_lights(self, old, new):
+        self.change_light(old,0)
+        self.change_light(old+1,0)
+        self.change_light(new,2)
+        self.change_light(new+1,2)
+
+    def change_light(self, light, mode):
+        if self.lights[light] is not False:
+            self.lights[light] = mode

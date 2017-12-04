@@ -27,4 +27,4 @@ class Region(threading.Thread):
     def run(self):
         while True:
             tick = self.tick.get()
-            cprint("\t{}".format(tick),"magenta")
+            # cprint("\t{}".format(tick),"magenta")
