@@ -1,0 +1,11 @@
+#Region
+-IntC
+-Int1
+-Int2
+-Int3
+
+//North South
+*RoadNameN_S,IntC,Int3,10,10
+
+//East West
+*RoadNameE_W,Int1,IntC,Int2,10,10

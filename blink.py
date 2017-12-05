@@ -2,6 +2,17 @@ from dependencies import *
 from person_objects import *
 from road_objects import *
 from pprint import pprint
+import argparse
+
+"""
+NEEDED LATER FOR TERMINAL INPUT
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('network', metavar='N', type=argparse.FileType('r'), help='A file containing a road network.')
+# parser.add_argument('--sum', dest='accumulate', action='store_const',const=sum, default=max, help='sum the integers (default: find the max)')
+args = parser.parse_args()
+print(args.network)
+"""
 
 """
 For Simulation Purposes
@@ -14,7 +25,7 @@ Helper
 """
 def check_input():
     if len(sys.argv) < 2:
-        cprint("\nUsage: blink.py <network>\n", 'yellow')
+        cprint("\nUsage: blink.py <network> <ticks> \n", 'yellow')
         sys.exit()
 def display_network(road_network):
     for rid in road_network:
@@ -44,15 +55,14 @@ def create_network():
             road_network[intersection.name] = intersection
         if b[0] == "*":
             road_info = b[1:].split(",")
-            # pprint(road_info)
             for r in range(len(road_info[1:-3])):
                 road = Road(road_info[0], road_info[r+2], road_info[r+1], int(road_info[-2]), int(road_info[-1]))
-                road_network[road_info[r+1].rstrip()].attach_road(True, road)
-                road_network[road_info[r+2].rstrip()].attach_road(False, road)
+                road_network[road_info[r+1].rstrip()].attach_road("enter", road)
+                road_network[road_info[r+2].rstrip()].attach_road("exit", road)
 
                 road = Road(road_info[0], road_info[r+1], road_info[r+2], int(road_info[-2]), int(road_info[-1]))
-                road_network[road_info[r+2].rstrip()].attach_road(True, road)
-                road_network[road_info[r+1].rstrip()].attach_road(False, road)
+                road_network[road_info[r+2].rstrip()].attach_road("enter", road)
+                road_network[road_info[r+1].rstrip()].attach_road("exit", road)
 
 """
 Initialize Network
@@ -78,7 +88,9 @@ def run_network():
 check_input()
 create_network()
 init_network()
+
+pprint(road_network["IntC"].roads)
+pprint(road_network["IntC"].lights)
+pprint(road_network["IntC"].cycle_times)
+
 run_network()
-# pprint(road_network["IntC"].input_road)
-# pprint(road_network["IntC"].exit_road)
-# pprint(road_network["IntC"].lights)
