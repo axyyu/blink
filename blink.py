@@ -2,7 +2,9 @@ from dependencies import *
 from person_objects import *
 from road_objects import *
 from pprint import pprint
+
 import argparse
+import configparser
 
 """
 NEEDED LATER FOR TERMINAL INPUT
@@ -19,6 +21,7 @@ For Simulation Purposes
 """
 tick = 0
 road_network = {}
+inject_rate = .5
 
 """
 Helper
@@ -27,12 +30,16 @@ def check_input():
     if len(sys.argv) < 2:
         cprint("\nUsage: blink.py <network> <ticks> \n", 'yellow')
         sys.exit()
-def display_network(road_network):
-    for rid in road_network:
-        # print("\n{}{}{}".format(colors.PURPLE + colors.BOLD, rid, colors.ENDC))
-        cprint("\n{}".format(rid), 'magenta', attrs=['bold'])
-        for iid in road_network[rid].intersections:
-            pass
+
+"""
+Configure
+Reads configuration settings
+"""
+def configure():
+    global inject_rate
+    config = configparser.ConfigParser()
+    config.read('blink_conf.conf')
+    inject_rate = float(config["PARAMETERS"]["InjectRate"])
 
 """
 Input Road Network
@@ -51,7 +58,7 @@ def create_network():
             region = Region(queue.Queue(), b[1:])
             road_network[region.name] = region
         if b[0] == "-":
-            intersection = Intersection(queue.Queue(), b[1:], region.id, region.com)
+            intersection = Intersection(queue.Queue(), b[1:], region.id, region.com, inject_rate)
             road_network[intersection.name] = intersection
         if b[0] == "*":
             road_info = b[1:].split(",")
@@ -85,12 +92,9 @@ def run_network():
         tick+=1
     pass
 
+configure()
 check_input()
 create_network()
 init_network()
-
-pprint(road_network["IntC"].roads)
-pprint(road_network["IntC"].lights)
-pprint(road_network["IntC"].cycle_times)
-
+# display_network()
 run_network()
