@@ -44,6 +44,7 @@ class Intersection(threading.Thread):
             self.simulate_cars()
             self.update_cars()
             cprint("\t{}\t{}".format(self.name,self.car_freq() ),"blue")
+            # self.road_status()
 
     """
     Attaching Roads
@@ -80,6 +81,11 @@ class Intersection(threading.Thread):
     """
     Handle Cars
     """
+
+    # def road_status(self):
+    #     for r in self.roads:
+    #         print(self.roads[r]["enter"])
+    
     def car_freq(self):
         return { r:len(self.roads[r]["enter"].queue) for r in self.roads}
             

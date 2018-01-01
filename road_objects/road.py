@@ -38,7 +38,7 @@ class Road(queue.PriorityQueue):
         return False
     
     def detect_front(self):
-        if self.queue[0][0] == 0:
+        if len(self.queue) > 0 and self.queue[0][0] == 0:
             return True
         return False
 
@@ -49,7 +49,7 @@ class Road(queue.PriorityQueue):
         super().put([self.length-1,vehicle])
 
     def update(self):
-        if not self.detect_front:
+        if not self.detect_front():
             for v in self.queue:
                 v[0] -= 1
 
@@ -57,6 +57,7 @@ class Road(queue.PriorityQueue):
         if target.detect_availible():
             if self.detect_front:
                 target.add_vehicle(super().get()[1])
+                cprint("\t\t{} -> {}".format( self.end_int, target.end_int ),"yellow")
     
     """
     Vehicle Injection

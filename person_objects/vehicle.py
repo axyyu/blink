@@ -17,6 +17,9 @@ class Vehicle():
     def __str__(self):
         return self.id
 
+    def __repr__(self):
+        return str(self.id)[:5]
+
     """
     Calculate the remaining possible destinations using the movement history
     """
