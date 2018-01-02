@@ -86,10 +86,17 @@ def run_network():
         cprint("\nActive Threads: {}\n".format(threading.active_count()),"green")
         cprint("\t{}".format(tick),"magenta")
 
+        time.sleep(1)
+
         for k in road_network:
             road_network[k].tick.put(tick)
-        time.sleep(1)
-        tick+=1
+
+        for v in road_network:
+            if v != road_network[v].com.get():
+                cprint("{} {}".format("Error: Verication is incorrect for", v),"red")
+                raise ValueError("Code broke")
+            road_network[v].status()
+            
     pass
 
 configure()

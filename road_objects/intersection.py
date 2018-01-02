@@ -12,6 +12,7 @@ class Intersection(threading.Thread):
 
         self.id = uuid.uuid4()
         self.name = name
+        self.com = queue.Queue()
         self.region = region
         self.region_com = region_com
         self.inject_rate = inject_rate
@@ -43,8 +44,14 @@ class Intersection(threading.Thread):
             self.update_lights()
             self.simulate_cars()
             self.update_cars()
-            cprint("\t{}\t{}".format(self.name,self.car_freq() ),"blue")
-            # self.road_status()
+            self.com.put(self.name)
+
+    """
+    Status
+    Print out necessary information
+    """
+    def status(self):
+        cprint("\t{}\t{}".format(self.name,self.car_freq() ),"blue")
 
     """
     Attaching Roads

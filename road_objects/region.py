@@ -27,4 +27,13 @@ class Region(threading.Thread):
     def run(self):
         while True:
             tick = self.tick.get()
+
+            self.com.put(self.name) #For verification
             # cprint("\t{}".format(tick),"magenta")
+    
+    """
+    Status
+    Print out necessary information
+    """
+    def status(self):
+        pass
