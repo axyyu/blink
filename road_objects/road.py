@@ -57,7 +57,7 @@ class Road(queue.PriorityQueue):
         if target.detect_availible():
             if self.detect_front:
                 target.add_vehicle(super().get()[1])
-                cprint("\t\t{} -> {}".format( self.end_int, target.end_int ),"yellow")
+                cprint("\t\t{}: {} -> {}".format( self.name, self.end_int, target.end_int ),"yellow")
     
     """
     Vehicle Injection

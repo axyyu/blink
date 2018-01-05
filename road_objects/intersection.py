@@ -51,7 +51,7 @@ class Intersection(threading.Thread):
     Print out necessary information
     """
     def status(self):
-        cprint("\t{}\t{}".format(self.name,self.car_freq() ),"blue")
+        cprint("\t{}\t{}\t{}".format(self.name,self.car_freq(), self.lights ),"blue")
 
     """
     Attaching Roads

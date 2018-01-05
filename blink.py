@@ -87,7 +87,10 @@ def run_network():
         cprint("\t{}".format(tick),"magenta")
 
         time.sleep(1)
-
+        
+        """
+        Verification
+        """
         for k in road_network:
             road_network[k].tick.put(tick)
 
@@ -96,7 +99,8 @@ def run_network():
                 cprint("{} {}".format("Error: Verication is incorrect for", v),"red")
                 raise ValueError("Code broke")
             road_network[v].status()
-            
+
+        tick+=1
     pass
 
 configure()
