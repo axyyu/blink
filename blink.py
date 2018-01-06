@@ -1,6 +1,7 @@
 from dependencies import *
 from person_objects import *
 from road_objects import *
+from gui_objects import *
 from pprint import pprint
 
 import argparse
@@ -102,6 +103,10 @@ def run_network():
 
         tick+=1
     pass
+
+app = wx.App()  
+Blink_Frame(None, road_network) 
+app.MainLoop() 
 
 configure()
 check_input()
