@@ -76,12 +76,19 @@ def create_network():
 Initialize Network
 Starts all the threads
 """
-def init_network():
+def init_network(window):
+    cprint("\nInitializing Network...\n","yellow")
     for k in road_network:
-        road_network[k].init()
+        road_network[k].init(window)
+
+def create_gui(app, window):
+    window.Show(True)
+    t = threading.Thread(target=app.MainLoop)
+    t.start()
 
 def run_network():
     global tick
+    cprint("\nRunning Network...\n","yellow")
     while True:
         count = threading.active_count()
         cprint("\nActive Threads: {}\n".format(threading.active_count()),"green")
@@ -89,28 +96,33 @@ def run_network():
 
         time.sleep(1)
         
+        # for k in road_network:
+        #     road_network[k].tick.put(tick)
+
         """
         Verification
         """
-        for k in road_network:
-            road_network[k].tick.put(tick)
-
-        for v in road_network:
-            if v != road_network[v].com.get():
-                cprint("{} {}".format("Error: Verication is incorrect for", v),"red")
-                raise ValueError("Code broke")
-            road_network[v].status()
+        # for v in road_network:
+        #     if v != road_network[v].com.get():
+        #         cprint("{} {}".format("Error: Verication is incorrect for", v),"red")
+        #         raise ValueError("Code broke")
+        #     road_network[v].status()
 
         tick+=1
     pass
 
+"""
+GUI PURPOSES
+"""
 app = wx.App()  
-Blink_Frame(None, road_network) 
-app.MainLoop() 
+window = Blink_Frame(None)
 
+"""
+ROAD NETWORK
+"""
 configure()
 check_input()
 create_network()
-init_network()
-# display_network()
-run_network()
+init_network(window)
+create_gui(app, window)
+# run_network()
