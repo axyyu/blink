@@ -13,7 +13,7 @@ class Region(threading.Thread):
         self.name = name
 
         self.tick = tick
-        self.com = queue.Queue()
+        self.int_com = queue.Queue() #Communication with int
     
     def __str__(self):
         return self.name
@@ -21,14 +21,14 @@ class Region(threading.Thread):
     def __repr__(self):
         return self.name
 
-    def init(self, window):
+    def init(self, window=None):
         self.start()
 
     def run(self):
         while True:
             tick = self.tick.get()
 
-            self.com.put(self.name) #For verification
+            self.tick.put(self.name) #Verification
             # cprint("\t{}".format(tick),"magenta")
     
     """

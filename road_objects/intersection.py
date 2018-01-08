@@ -12,12 +12,14 @@ class Intersection(threading.Thread):
 
         self.id = uuid.uuid4()
         self.name = name
-        self.com = queue.Queue()
+
         self.region = region
         self.region_com = region_com
-        self.inject_rate = inject_rate
 
-        self.tick = tick
+        self.inject_rate = float(inject_rate) # Inject rate for vehicles
+
+        self.tick = tick # Communication with simulation
+
         self.inner_tick = 0
         self.roads = {}
 
@@ -32,7 +34,7 @@ class Intersection(threading.Thread):
     def __repr__(self):
         return self.name
 
-    def init(self, window):
+    def init(self, window=None):
         self.init_lights()
         self.current_cycle = 0
         self.start()
@@ -44,7 +46,8 @@ class Intersection(threading.Thread):
             self.update_lights()
             self.simulate_cars()
             self.update_cars()
-            self.com.put(self.name)
+
+            self.tick.put(self.name) # Verification
 
     """
     Status

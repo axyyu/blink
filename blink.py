@@ -1,11 +1,21 @@
 from dependencies import *
-from person_objects import *
-from road_objects import *
-from gui_objects import *
-from pprint import pprint
-
 import argparse
-import configparser
+
+"""Custom Objects"""
+from blink_gui import BlinkGUI
+from blink_simulation import BlinkSimulation
+
+
+"""
+grey
+red - error messages
+green - productivity
+yellow - warning messages
+blue
+magenta - tick
+cyan - intersection
+white
+"""
 
 """
 NEEDED LATER FOR TERMINAL INPUT
@@ -18,13 +28,6 @@ print(args.network)
 """
 
 """
-For Simulation Purposes
-"""
-tick = 0
-road_network = {}
-inject_rate = .5
-
-"""
 Helper
 """
 def check_input():
@@ -33,96 +36,20 @@ def check_input():
         sys.exit()
 
 """
-Configure
-Reads configuration settings
-"""
-def configure():
-    global inject_rate
-    config = configparser.ConfigParser()
-    config.read('blink_conf.conf')
-    inject_rate = float(config["PARAMETERS"]["InjectRate"])
-
-"""
-Input Road Network
-Generates the network based on the file input
-"""
-def create_network():
-    content = []
-    with open(sys.argv[1], 'r') as f:
-        content = f.readlines()
-
-    for c in content:
-        b = c.lstrip().rstrip()
-        if len(b) <= 0:
-            continue
-        if b[0] == "#":
-            region = Region(queue.Queue(), b[1:])
-            road_network[region.name] = region
-        if b[0] == "-":
-            intersection = Intersection(queue.Queue(), b[1:], region.id, region.com, inject_rate)
-            road_network[intersection.name] = intersection
-        if b[0] == "*":
-            road_info = b[1:].split(",")
-            for r in range(len(road_info[1:-3])):
-                road = Road(road_info[0], road_info[r+2], road_info[r+1], int(road_info[-2]), int(road_info[-1]))
-                road_network[road_info[r+1].rstrip()].attach_road("enter", road)
-                road_network[road_info[r+2].rstrip()].attach_road("exit", road)
-
-                road = Road(road_info[0], road_info[r+1], road_info[r+2], int(road_info[-2]), int(road_info[-1]))
-                road_network[road_info[r+2].rstrip()].attach_road("enter", road)
-                road_network[road_info[r+1].rstrip()].attach_road("exit", road)
-
-"""
-Initialize Network
-Starts all the threads
-"""
-def init_network(window):
-    cprint("\nInitializing Network...\n","yellow")
-    for k in road_network:
-        road_network[k].init(window)
-
-def create_gui(app, window):
-    window.Show(True)
-    t = threading.Thread(target=app.MainLoop)
-    t.start()
-
-def run_network():
-    global tick
-    cprint("\nRunning Network...\n","yellow")
-    while True:
-        count = threading.active_count()
-        cprint("\nActive Threads: {}\n".format(threading.active_count()),"green")
-        cprint("\t{}".format(tick),"magenta")
-
-        time.sleep(1)
-        
-        # for k in road_network:
-        #     road_network[k].tick.put(tick)
-
-        """
-        Verification
-        """
-        # for v in road_network:
-        #     if v != road_network[v].com.get():
-        #         cprint("{} {}".format("Error: Verication is incorrect for", v),"red")
-        #         raise ValueError("Code broke")
-        #     road_network[v].status()
-
-        tick+=1
-    pass
-
-"""
 GUI PURPOSES
-"""
+
 app = wx.App()  
 window = Blink_Frame(None)
+"""
 
 """
 ROAD NETWORK
 """
-configure()
 check_input()
-create_network()
-init_network(window)
-create_gui(app, window)
-# run_network()
+network_file = sys.argv[1]
+config_file = "blink_conf.conf"
+
+sim = BlinkSimulation()
+sim.configure(config_file)
+sim.create_network(network_file)
+sim.init()

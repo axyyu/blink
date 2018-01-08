@@ -4,107 +4,97 @@ Blink Simulation
 Not run on main thread
 """
 from dependencies import *
-from input_objects import intersection_control
-from person_objects import *
+from road_objects import *
+import configparser
 
-class Intersection(threading.Thread):
-    def __init__(self, tick, name, region, region_com, inject_rate):
+class BlinkSimulation(threading.Thread):
+    def __init__(self):
         threading.Thread.__init__(self)
 
-        self.id = uuid.uuid4()
-        self.name = name
-        self.com = queue.Queue()
-        self.region = region
-        self.region_com = region_com
-        self.inject_rate = inject_rate
+        self.tick = 0
+        self.road_network = {}
+        self.inject_rate = .5
+        self.length = 0
+        self.GUI = True
+        self.size = 0
 
-        self.tick = tick
-        self.inner_tick = 0
-        self.roads = {}
+    def init(self, window=None):
+        for k in self.road_network:
+            self.road_network[k].init(window)
+        self.size = len(self.road_network)
 
-        self.lights = {}
-        self.cycle_times = {}
-        self.light_dir = []
-        self.current_cycle = False
-    
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.name
-
-    def init(self, window):
-        self.init_lights()
-        self.current_cycle = 0
         self.start()
 
     def run(self):
-        while True:
-            tick = self.tick.get()
-            self.inner_tick+=1
-            self.update_lights()
-            self.simulate_cars()
-            self.update_cars()
-            self.com.put(self.name)
+        cprint("\nRunning Network...\n","yellow")
+        while self.tick < self.length:
+            self.thread_check()
+            self.update_tick()
+            self.verify_network()
+            self.status()
 
     """
-    Status
-    Print out necessary information
+    Network
     """
+    def configure(self, config_file):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+
+        self.length = float(config["PARAMETERS"]["SimulationLength"])
+        self.GUI = (float(config["PARAMETERS"]["GUI"]) == 1)
+        self.tick_delay = float(config["PARAMETERS"]["TickDelay"])
+
+    def create_network(self, network_file):
+        content = []
+
+        with open(network_file, 'r') as f:
+            content = f.readlines()
+
+        for c in content:
+            b = c.lstrip().rstrip()
+            if len(b) <= 0:
+                continue
+            if b[0] == "#":
+                region = Region(queue.Queue(), b[1:])
+                self.road_network[region.name] = region
+            if b[0] == "-":
+                int_info = b[1:].split(",")
+                intersection = Intersection(queue.Queue(), int_info[0], region.id, region.int_com, int_info[1])
+                self.road_network[intersection.name] = intersection
+            if b[0] == "*":
+                road_info = b[1:].split(",")
+                for r in range(len(road_info[1:-3])):
+                    road = Road(road_info[0], road_info[r+2], road_info[r+1], int(road_info[-2]), int(road_info[-1]))
+                    self.road_network[road_info[r+1].rstrip()].attach_road("enter", road)
+                    self.road_network[road_info[r+2].rstrip()].attach_road("exit", road)
+
+                    road = Road(road_info[0], road_info[r+1], road_info[r+2], int(road_info[-2]), int(road_info[-1]))
+                    self.road_network[road_info[r+2].rstrip()].attach_road("enter", road)
+                    self.road_network[road_info[r+1].rstrip()].attach_road("exit", road)
+
+    """
+    Running
+    """
+    def update_tick(self):
+        cprint("\t{}".format(self.tick), "magenta")
+
+        for k in self.road_network:
+            self.road_network[k].tick.put(self.tick)
+        
+        time.sleep(self.tick_delay)
+        self.tick += 1
+
+    def thread_check(self):
+        count = threading.active_count() - 1
+        if self.size == count:
+            cprint("\nThread count doesn't match: {} != {}\n".format(count, self.size), "yellow")
+
+    def verify_network(self):
+        for k in self.road_network:
+            if k != self.road_network[k].tick.get():
+                cprint("Error: Verication is incorrect for {} {}".format(k, self.road_network[k].name), "red")
+                raise ValueError("Code broke")
+
     def status(self):
-        cprint("\t{}\t{}\t{}".format(self.name,self.car_freq(), self.lights ),"blue")
-
-    """
-    Attaching Roads
-    Attempts to find a road in the opposite direction thats already been attached
-    """
-    def attach_road(self, option, road):
-        if road.name not in self.roads:
-            self.roads[road.name] = {}
-        self.roads[road.name][option] = road
-
-    """
-    Light management
-    """
-    def init_lights(self):
-        self.lights = {r: False for r in self.roads}
-        self.cycle_times = {r:5 for r in self.roads}
-        self.light_dir = list(self.lights.keys())
-
-    def update_lights(self):
-        cycle = self.light_dir[self.current_cycle]
-        if self.inner_tick > self.cycle_times[self.light_dir[self.current_cycle]]:
-            self.inner_tick = 0
-            new_cycle = (self.current_cycle + 1) % len(self.light_dir)
-            self.change_lights(self.current_cycle, new_cycle)
-            self.current_cycle = new_cycle
-        elif self.inner_tick == self.cycle_times[self.light_dir[self.current_cycle]]:
-            if self.lights[ cycle] == True :
-                self.lights[ cycle ] = 0
-
-    def change_lights(self, old, new):
-        self.lights[ self.light_dir[old] ] = False
-        self.lights[ self.light_dir[new] ] = True
-
-    """
-    Handle Cars
-    """
-
-    # def road_status(self):
-    #     for r in self.roads:
-    #         print(self.roads[r]["enter"])
-    
-    def car_freq(self):
-        return { r:len(self.roads[r]["enter"].queue) for r in self.roads}
-            
-
-    def update_cars(self):
-        for r in self.roads:
-            self.roads[r]["enter"].update()
-            if self.lights[r]:
-                self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"])
-
-    def simulate_cars(self):
-        for r in self.roads:
-            if random.random() < self.inject_rate:
-                self.roads[r]["enter"].randomly_inject()
+        for k in self.road_network:
+            self.road_network[k].status()

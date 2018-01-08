@@ -1,8 +1,8 @@
 #Region
--IntC
--Int1
--Int2
--Int3
+-IntC,.25
+-Int1,.25
+-Int2,.25
+-Int3,.25
 
 //North South
 *RoadNameN_S,IntC,Int3,10,10
