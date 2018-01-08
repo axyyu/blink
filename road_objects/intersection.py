@@ -7,7 +7,7 @@ from input_objects import intersection_control
 from person_objects import *
 
 class Intersection(threading.Thread):
-    def __init__(self, tick, name, region, region_com, inject_rate):
+    def __init__(self, tick, name, region, region_com, inject_rate, loss_rate):
         threading.Thread.__init__(self)
 
         self.id = uuid.uuid4()
@@ -17,8 +17,10 @@ class Intersection(threading.Thread):
         self.region_com = region_com
 
         self.inject_rate = float(inject_rate) # Inject rate for vehicles
+        self.loss_rate = float(loss_rate)
 
         self.tick = tick # Communication with simulation
+        self.verif = queue.Queue() # Verification with simulation
 
         self.inner_tick = 0
         self.roads = {}
@@ -47,14 +49,14 @@ class Intersection(threading.Thread):
             self.simulate_cars()
             self.update_cars()
 
-            self.tick.put(self.name) # Verification
+            self.verif.put(self.name) # Verification
 
     """
     Status
     Print out necessary information
     """
     def status(self):
-        cprint("\t{}\t{}\t{}".format(self.name,self.car_freq(), self.lights ),"blue")
+        cprint("\t{}\t{}\t{}".format(self.name,self.car_freq(), self.lights ), "blue")
 
     """
     Attaching Roads
@@ -104,9 +106,11 @@ class Intersection(threading.Thread):
         for r in self.roads:
             self.roads[r]["enter"].update()
             if self.lights[r]:
-                self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"])
+                self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"], self.name)
 
     def simulate_cars(self):
         for r in self.roads:
             if random.random() < self.inject_rate:
                 self.roads[r]["enter"].randomly_inject()
+            if random.random() < self.loss_rate:
+                self.roads[r]["enter"].randomly_remove()

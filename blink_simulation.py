@@ -59,7 +59,7 @@ class BlinkSimulation(threading.Thread):
                 self.road_network[region.name] = region
             if b[0] == "-":
                 int_info = b[1:].split(",")
-                intersection = Intersection(queue.Queue(), int_info[0], region.id, region.int_com, int_info[1])
+                intersection = Intersection(queue.Queue(), int_info[0], region.id, region.int_com, int_info[1], int_info[2])
                 self.road_network[intersection.name] = intersection
             if b[0] == "*":
                 road_info = b[1:].split(",")
@@ -76,7 +76,7 @@ class BlinkSimulation(threading.Thread):
     Running
     """
     def update_tick(self):
-        cprint("\t{}".format(self.tick), "magenta")
+        cprint("{}".format(self.tick), "magenta")
 
         for k in self.road_network:
             self.road_network[k].tick.put(self.tick)
@@ -91,7 +91,7 @@ class BlinkSimulation(threading.Thread):
 
     def verify_network(self):
         for k in self.road_network:
-            if k != self.road_network[k].tick.get():
+            if k != self.road_network[k].verif.get():
                 cprint("Error: Verication is incorrect for {} {}".format(k, self.road_network[k].name), "red")
                 raise ValueError("Code broke")
 

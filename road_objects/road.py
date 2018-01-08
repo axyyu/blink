@@ -53,9 +53,9 @@ class Road(queue.PriorityQueue):
             for v in self.queue:
                 v[0] -= 1
 
-    def pass_vehicles(self, target):
+    def pass_vehicles(self, target, int_name):
         if target.detect_availible():
-            if self.detect_front:
+            if self.detect_front():
                 target.add_vehicle(super().get()[1])
                 cprint("\t\t{}: {} -> {}".format( self.name, self.end_int, target.end_int ),"yellow")
     
@@ -70,5 +70,6 @@ class Road(queue.PriorityQueue):
     Vehicle Removal
     """
     def randomly_remove(self):
-        v = random.randint(0,len(self.queue))
-        self.queue.pop(v)
+        if len(self.queue) > 0:
+            v = random.randint(0,len(self.queue) - 1)
+            self.queue.pop(v)

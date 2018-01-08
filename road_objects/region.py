@@ -13,6 +13,7 @@ class Region(threading.Thread):
         self.name = name
 
         self.tick = tick
+        self.verif = queue.Queue() #Verification with sim
         self.int_com = queue.Queue() #Communication with int
     
     def __str__(self):
@@ -28,7 +29,7 @@ class Region(threading.Thread):
         while True:
             tick = self.tick.get()
 
-            self.tick.put(self.name) #Verification
+            self.verif.put(self.name) #Verification
             # cprint("\t{}".format(tick),"magenta")
     
     """
