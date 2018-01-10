@@ -49,6 +49,8 @@ check_input()
 network_file = sys.argv[1]
 config_file = "blink_conf.conf"
 
+gui = BlinkGUI()
+
 sim = BlinkSimulation()
 sim.configure(config_file)
 sim.create_network(network_file)
