@@ -39,6 +39,9 @@ class Intersection(threading.Thread):
     def init(self, window=None):
         self.init_lights()
         self.current_cycle = 0
+
+        window.addIntersection(self.name)
+        self.verif.put(self.name)
         self.start()
 
     def run(self):

@@ -24,6 +24,7 @@ class Region(threading.Thread):
 
     def init(self, window=None):
         self.start()
+        self.verif.put(self.name)
 
     def run(self):
         while True:
