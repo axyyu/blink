@@ -25,10 +25,10 @@ class Blink_Frame(wx.Frame):
         self.panel_height = self.height/self.grid_y
         self.panel_count = 0
 
-    def addIntersection(self, name):
+    def addIntersection(self, name, roads):
         x = int(self.panel_count%self.grid_x) * self.panel_width
         y = int(self.panel_count/self.grid_x) * self.panel_height
         # title = wx.StaticText(self, label = name)
-        self.panels[name] = intersection_panel.Intersection_Panel(self, name, (x+10, y+10), (self.panel_width-20, self.panel_height-20) )
+        self.panels[name] = intersection_panel.Intersection_Panel(self, name, roads, (x+10, y+10), (self.panel_width-20, self.panel_height-20) )
         self.panel_count+=1
         return self.panels[name]

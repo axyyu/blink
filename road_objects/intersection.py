@@ -40,7 +40,8 @@ class Intersection(threading.Thread):
         self.init_lights()
         self.current_cycle = 0
 
-        window.addIntersection(self.name)
+        self.panel = window.addIntersection(self.name, self.roads)
+
         self.verif.put(self.name)
         self.start()
 
@@ -51,6 +52,8 @@ class Intersection(threading.Thread):
             self.update_lights()
             self.simulate_cars()
             self.update_cars()
+            
+            self.panel.updateStatus(self)
 
             self.verif.put(self.name) # Verification
 
@@ -72,9 +75,13 @@ class Intersection(threading.Thread):
 
     """
     Light management
+
+    R = -1
+    Y = 0
+    G = 1
     """
     def init_lights(self):
-        self.lights = {r: False for r in self.roads}
+        self.lights = {r: -1 for r in self.roads}
         self.cycle_times = {r:5 for r in self.roads}
         self.light_dir = list(self.lights.keys())
 
@@ -86,12 +93,12 @@ class Intersection(threading.Thread):
             self.change_lights(self.current_cycle, new_cycle)
             self.current_cycle = new_cycle
         elif self.inner_tick == self.cycle_times[self.light_dir[self.current_cycle]]:
-            if self.lights[ cycle] == True :
+            if self.lights[ cycle] == 1 :
                 self.lights[ cycle ] = 0
 
     def change_lights(self, old, new):
-        self.lights[ self.light_dir[old] ] = False
-        self.lights[ self.light_dir[new] ] = True
+        self.lights[ self.light_dir[old] ] = -1
+        self.lights[ self.light_dir[new] ] = 1
 
     """
     Handle Cars
@@ -108,7 +115,7 @@ class Intersection(threading.Thread):
     def update_cars(self):
         for r in self.roads:
             self.roads[r]["enter"].update()
-            if self.lights[r]:
+            if self.lights[r] == 1 or self.lights[r] == 0:
                 self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"], self.name)
 
     def simulate_cars(self):
