@@ -29,6 +29,9 @@ class Intersection(threading.Thread):
         self.cycle_times = {}
         self.light_dir = []
         self.current_cycle = False
+
+        # Evaluation
+        self.car_freq = [0 for x in range(30)] # SET TRAILING WINDOW AS SIMULATION PARAMETER
     
     def __str__(self):
         return self.name
@@ -49,9 +52,17 @@ class Intersection(threading.Thread):
         while True:
             tick = self.tick.get()
             self.inner_tick+=1
+
+            cprint("\t\t {} ONE".format(self.name), "red")
             self.update_lights()
+            cprint("\t\t\t {} TWO".format(self.name), "red")
             self.simulate_cars()
-            self.update_cars()
+            cprint("\t\t\t\t {} THREE".format(self.name), "red")
+            cars_passing = self.update_cars()
+            cprint("\t\t\t\t\t {} FOUR".format(self.name), "red")
+
+            self.update_car_freq(cars_passing)
+            self.eval()
             
             self.panel.updateStatus(self)
 
@@ -62,7 +73,7 @@ class Intersection(threading.Thread):
     Print out necessary information
     """
     def status(self):
-        cprint("\t{}\t{}\t{}".format(self.name,self.car_freq(), self.lights ), "blue")
+        cprint("\t{}\t{}\t{}".format(self.name, self.cars_in_roads(), self.lights ), "blue")
 
     """
     Attaching Roads
@@ -87,13 +98,14 @@ class Intersection(threading.Thread):
 
     def update_lights(self):
         cycle = self.light_dir[self.current_cycle]
+        new_cycle = (self.current_cycle + 1) % len(self.light_dir)
+
         if self.inner_tick > self.cycle_times[self.light_dir[self.current_cycle]]:
             self.inner_tick = 0
-            new_cycle = (self.current_cycle + 1) % len(self.light_dir)
             self.change_lights(self.current_cycle, new_cycle)
             self.current_cycle = new_cycle
         elif self.inner_tick == self.cycle_times[self.light_dir[self.current_cycle]]:
-            if self.lights[ cycle] == 1 :
+            if self.lights[ cycle] == 1 and new_cycle != self.current_cycle:
                 self.lights[ cycle ] = 0
 
     def change_lights(self, old, new):
@@ -108,15 +120,18 @@ class Intersection(threading.Thread):
     #     for r in self.roads:
     #         print(self.roads[r]["enter"])
     
-    def car_freq(self):
-        return { r:len(self.roads[r]["enter"].queue) for r in self.roads}
-            
+    def cars_in_roads(self):
+        return { r:len(self.roads[r]["enter"].queue) for r in self.roads}   
 
     def update_cars(self):
+        car_count = 0
         for r in self.roads:
             self.roads[r]["enter"].update()
             if self.lights[r] == 1 or self.lights[r] == 0:
-                self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"], self.name)
+                if self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"], self.name):
+                    car_count += 1
+        return car_count
+        
 
     def simulate_cars(self):
         for r in self.roads:
@@ -124,3 +139,15 @@ class Intersection(threading.Thread):
                 self.roads[r]["enter"].randomly_inject()
             if random.random() < self.loss_rate:
                 self.roads[r]["enter"].randomly_remove()
+
+    """
+    Evaluation
+    """
+    def update_car_freq(self, cars):
+        self.car_freq.pop(0)
+        self.car_freq.append(cars)
+
+    def eval(self):
+        stats = {}
+        stats['SMA'] = sum(self.car_freq)/len(self.car_freq)
+        return stats

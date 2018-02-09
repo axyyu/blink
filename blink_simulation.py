@@ -33,6 +33,8 @@ class BlinkSimulation(threading.Thread):
             self.verify_network()
             self.status()
 
+        cprint("\nEnded Simulation\n","yellow")
+
     """
     Network
     """
@@ -81,7 +83,7 @@ class BlinkSimulation(threading.Thread):
         for k in self.road_network:
             self.road_network[k].tick.put(self.tick)
         
-        time.sleep(self.tick_delay)
+        # time.sleep(self.tick_delay)
         self.tick += 1
 
     def thread_check(self):

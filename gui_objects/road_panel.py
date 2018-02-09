@@ -1,13 +1,13 @@
 """
-Intersection Panel
+Road Panel
 
 """
 
 from dependencies import *
 
-class Intersection_Panel(wx.Panel):  
+class Road_Panel(wx.Panel):  
       
-    def __init__(self, parent, name, roads, pos, size):  
+    def __init__(self, parent, name, pos, size):  
         super(Intersection_Panel, self).__init__(parent, style=wx.SIMPLE_BORDER)
         # self.SetBackgroundColour(wx.BLUE)
         self.SetPosition(pos)
@@ -22,10 +22,6 @@ class Intersection_Panel(wx.Panel):
 
         self.fonts = {
             "title": wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.BOLD),
-            # "efficiency": wx.Font(18, wx.DECORATIVE, wx.ITALIC, wx.NORMAL),
-            # "red": wx.Font(14, wx.DECORATIVE, wx.ITALIC, wx.NORMAL, ),
-            # "green": wx.Font(14, wx.DECORATIVE, wx.ITALIC, wx.NORMAL),
-            # "yellow": wx.Font(14, wx.DECORATIVE, wx.ITALIC, wx.NORMAL),
         }
 
         self.InitUI()
@@ -53,7 +49,6 @@ class Intersection_Panel(wx.Panel):
     """
     def updateStatus(self, intersection):
         try:
-            self.efficiency.SetLabel( str(intersection.eval()['SMA']) )
             for n in self.road_names:
                 if intersection.lights[n] == 0: # Yellow
                     self.road_status[n][0].SetBackgroundColour((255,255,0))

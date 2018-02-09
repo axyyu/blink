@@ -5,9 +5,9 @@ Road Object
 from dependencies import *
 from person_objects import *
 
-class Road(queue.PriorityQueue):
+class Road():
     def __init__(self, name, start_int, end_int, length=20, capacity=2):
-        queue.PriorityQueue.__init__(self,capacity)
+        # queue.PriorityQueue.__init__(self,capacity)
 
         self.id = uuid.uuid4()
         self.start_int = start_int
@@ -15,6 +15,7 @@ class Road(queue.PriorityQueue):
         self.name = name
         self.length = length
         self.capacity = capacity
+        self.queue = []
 
     def __str__(self):
         return "{} {}".format(self.name, self.queue)
@@ -46,7 +47,7 @@ class Road(queue.PriorityQueue):
     Road Methods
     """
     def add_vehicle(self, vehicle):
-        super().put([self.length-1,vehicle])
+        self.queue.append([self.length-1,vehicle])
 
     def update(self):
         if not self.detect_front():
@@ -54,17 +55,26 @@ class Road(queue.PriorityQueue):
                 v[0] -= 1
 
     def pass_vehicles(self, target, int_name):
-        if target.detect_availible():
-            if self.detect_front():
-                target.add_vehicle(super().get()[1])
-                cprint("\t\t{}: {} -> {}".format( self.name, self.end_int, target.end_int ),"yellow")
+        try:
+            if target.detect_availible():
+                if self.detect_front():
+                    temp = self.queue.pop()
+                    target.add_vehicle(temp[0])
+                    cprint("\t\t{}: {} -> {}".format( self.name, self.end_int, target.end_int ),"yellow")
+                    return True
+            return False
+        except Exception as e:
+            print(e)
     
     """
     Vehicle Injection
     """
     def randomly_inject(self):
-        if self.detect_availible():
-            self.add_vehicle(Vehicle())
+        try:
+            if self.detect_availible():
+                self.add_vehicle(Vehicle())
+        except Exception as e:
+            print(e)
 
     """
     Vehicle Removal
