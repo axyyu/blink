@@ -13,7 +13,8 @@ class Region(threading.Thread):
         self.name = name
 
         self.tick = tick
-        self.com = queue.Queue()
+        self.verif = queue.Queue() #Verification with sim
+        self.int_com = queue.Queue() #Communication with int
     
     def __str__(self):
         return self.name
@@ -21,10 +22,20 @@ class Region(threading.Thread):
     def __repr__(self):
         return self.name
 
-    def init(self):
+    def init(self, window=None):
         self.start()
+        self.verif.put(self.name)
 
     def run(self):
         while True:
             tick = self.tick.get()
+
+            self.verif.put(self.name) #Verification
             # cprint("\t{}".format(tick),"magenta")
+    
+    """
+    Status
+    Print out necessary information
+    """
+    def status(self):
+        pass
