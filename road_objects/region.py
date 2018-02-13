@@ -22,7 +22,7 @@ class Region(threading.Thread):
     def __repr__(self):
         return self.name
 
-    def init(self, window=None):
+    def init(self):
         self.start()
         self.verif.put(self.name)
 

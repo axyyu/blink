@@ -1,10 +1,7 @@
 from dependencies import *
 import argparse
 
-"""Custom Objects"""
-from blink_gui import BlinkGUI
 from blink_simulation import BlinkSimulation
-
 
 """
 grey
@@ -39,4 +36,8 @@ check_input()
 network_file = sys.argv[1]
 config_file = "blink_conf.conf"
 
-gui = BlinkGUI(network_file, config_file)
+
+sim = BlinkSimulation()
+sim.configure(config_file)
+sim.create_network(network_file)
+sim.init()

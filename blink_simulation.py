@@ -18,9 +18,9 @@ class BlinkSimulation(threading.Thread):
         self.GUI = True
         self.size = 0
 
-    def init(self, window=None):
+    def init(self):
         for k in self.road_network:
-            self.road_network[k].init(window)
+            self.road_network[k].init()
         self.size = len(self.road_network)
         self.verify_network()
         self.start()
@@ -46,7 +46,7 @@ class BlinkSimulation(threading.Thread):
         self.GUI = (float(config["PARAMETERS"]["GUI"]) == 1)
         self.tick_delay = float(config["PARAMETERS"]["TickDelay"])
 
-    def create_network(self, network_file, window=None):
+    def create_network(self, network_file):
         content = []
 
         with open(network_file, 'r') as f:

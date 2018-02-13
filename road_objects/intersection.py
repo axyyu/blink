@@ -39,11 +39,9 @@ class Intersection(threading.Thread):
     def __repr__(self):
         return self.name
 
-    def init(self, window=None):
+    def init(self):
         self.init_lights()
         self.current_cycle = 0
-
-        self.panel = window.addIntersection(self.name, self.roads)
 
         self.verif.put(self.name)
         self.start()
@@ -59,8 +57,6 @@ class Intersection(threading.Thread):
 
             self.update_car_freq(cars_passing)
             self.eval()
-            
-            self.panel.updateStatus(self)
 
             self.verif.put(self.name) # Verification
 
