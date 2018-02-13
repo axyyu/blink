@@ -10,3 +10,4 @@ pyvenv.cfg
 pip-selfcheck.json
 .vscode/
 *.pyc
+

@@ -4,6 +4,7 @@ Intersection Panel
 """
 
 from dependencies import *
+from gui_objects import road_panel
 
 class Intersection_Panel(wx.Panel):  
       
@@ -47,6 +48,8 @@ class Intersection_Panel(wx.Panel):
                 wx.StaticText(self, label = '0', style=wx.ALIGN_RIGHT, pos=(self.size[0] - 40, init_y + self.height_interval*roads))
             ]
             roads+=1
+        
+        road_panel.Road_Panel(self, "test", (10, 10), (self.size[0]-20, self.size[1]) )
 
     """
     Intersection Update

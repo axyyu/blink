@@ -53,13 +53,9 @@ class Intersection(threading.Thread):
             tick = self.tick.get()
             self.inner_tick+=1
 
-            cprint("\t\t {} ONE".format(self.name), "red")
             self.update_lights()
-            cprint("\t\t\t {} TWO".format(self.name), "red")
             self.simulate_cars()
-            cprint("\t\t\t\t {} THREE".format(self.name), "red")
             cars_passing = self.update_cars()
-            cprint("\t\t\t\t\t {} FOUR".format(self.name), "red")
 
             self.update_car_freq(cars_passing)
             self.eval()

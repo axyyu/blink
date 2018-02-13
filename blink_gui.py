@@ -19,5 +19,5 @@ class BlinkGUI():
         sim.create_network(network_file)
         sim.init(self.window)
 
-        # self.window.Show(True)
+        self.window.Show(True)
         self.app.MainLoop()

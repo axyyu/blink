@@ -75,7 +75,7 @@ class BlinkSimulation(threading.Thread):
                     self.road_network[road_info[r+1].rstrip()].attach_road("exit", road)
 
     """
-    Running
+    Running the Simulation
     """
     def update_tick(self):
         cprint("{}".format(self.tick), "magenta")
@@ -83,7 +83,7 @@ class BlinkSimulation(threading.Thread):
         for k in self.road_network:
             self.road_network[k].tick.put(self.tick)
         
-        # time.sleep(self.tick_delay)
+        time.sleep(self.tick_delay)
         self.tick += 1
 
     def thread_check(self):

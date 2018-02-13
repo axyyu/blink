@@ -47,6 +47,7 @@ class Road():
     Road Methods
     """
     def add_vehicle(self, vehicle):
+        vehicle.add_location(self.start_int)
         self.queue.append([self.length-1,vehicle])
 
     def update(self):
@@ -59,7 +60,7 @@ class Road():
             if target.detect_availible():
                 if self.detect_front():
                     temp = self.queue.pop()
-                    target.add_vehicle(temp[0])
+                    target.add_vehicle(temp[1])
                     cprint("\t\t{}: {} -> {}".format( self.name, self.end_int, target.end_int ),"yellow")
                     return True
             return False
@@ -72,7 +73,8 @@ class Road():
     def randomly_inject(self):
         try:
             if self.detect_availible():
-                self.add_vehicle(Vehicle())
+                v = Vehicle()
+                self.add_vehicle(v)
         except Exception as e:
             print(e)
 

@@ -13,6 +13,10 @@ class Vehicle():
         self.current_lane = -1
         self.projected_destinations = set()
         self.movement_history = []
+        
+        # For GUI Purposes
+        r = lambda: random.randint(0,255)
+        self.color = '#%02X%02X%02X'.format(r(),r(),r())
 
     def __str__(self):
         return self.id
@@ -23,6 +27,9 @@ class Vehicle():
     """
     Calculate the remaining possible destinations using the movement history
     """
+    def add_location(self, intersection):
+        self.movement_history.append(intersection)
+
     def update_destinations(self):
         destination_control.vehicle_destinations(self.movement_history, self.current_lane, self.projected_destinations)
 
@@ -36,7 +43,6 @@ class Vehicle():
 
     """
     For testing purposes
-    Should never be used in simulation
     """
     def __gt__(self, other):
         return self.id > other.id
