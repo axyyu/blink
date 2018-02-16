@@ -30,12 +30,19 @@ class Region(threading.Thread):
         while True:
             tick = self.tick.get()
 
-            self.verif.put(self.name) #Verification
-            # cprint("\t{}".format(tick),"magenta")
+            self.process_intersection_data()
+
+            self.verif.put(self.name) # Verification
     
     """
     Status
     Print out necessary information
     """
     def status(self):
+        pass
+
+    """
+    Region Control
+    """
+    def process_intersection_data(self):
         pass

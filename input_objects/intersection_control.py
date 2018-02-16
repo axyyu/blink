@@ -4,16 +4,14 @@ Where you input region control methods
 
 """
 Main Method - Do Not Edit Headers
-Needs to return something
-"""
-def run():
-    pass
 
+Returns dict with cycle times
+Keys - Road Name
+Value - Cycle Time
+{'RoadNameN_S': 5, 'RoadNameE_W': 5}
 """
-Moves cars from lane to lane
-"""
-def move_cars():
-    pass
+def run(metrics, roads, cycle_times):
+    return None
 
 """
 Neural Network to Determine Traffic Lights
