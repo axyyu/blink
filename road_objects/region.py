@@ -5,16 +5,14 @@ Region Object
 from dependencies import *
 from input_objects import region_control
 
-class Region(threading.Thread):
-    def __init__(self, tick, name):
-        threading.Thread.__init__(self)
-        
+class Region():
+    def __init__(self, name="Region"):
         self.id = uuid.uuid4()
         self.name = name
 
-        self.tick = tick
-        self.verif = queue.Queue() #Verification with sim
-        self.int_com = queue.Queue() #Communication with int
+        self.tick = 0 # Receive ticks from simulation
+        self.verif = [] # Verification with sim
+        self.intersection = [] # Communication with int
     
     def __str__(self):
         return self.name
@@ -23,16 +21,11 @@ class Region(threading.Thread):
         return self.name
 
     def init(self):
-        self.start()
-        self.verif.put(self.name)
+        self.verif.append(self.name)
 
     def run(self):
-        while True:
-            tick = self.tick.get()
-
-            self.process_intersection_data()
-
-            self.verif.put(self.name) # Verification
+        self.process_intersection_data()
+        self.verif.append(self.name) # Verification
     
     """
     Status

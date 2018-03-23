@@ -6,21 +6,15 @@ from dependencies import *
 from input_objects import intersection_control
 from person_objects import *
 
-class Intersection(threading.Thread):
-    def __init__(self, tick, name, region, region_com, inject_rate, loss_rate):
-        threading.Thread.__init__(self)
-
+class Intersection():
+    def __init__(self, name, region_com):
         self.id = uuid.uuid4()
         self.name = name
 
-        self.region = region
-        self.region_com = region_com
-
-        self.inject_rate = float(inject_rate) # Inject rate for vehicles
-        self.loss_rate = float(loss_rate)
-
-        self.tick = tick # Communication with simulation
-        self.verif = queue.Queue() # Verification with simulation
+        """ Communication """
+        self.tick = 0
+        self.verif = [] # Verification with sim
+        self.region = region_com
 
         self.inner_tick = 0
         self.roads = {}
@@ -44,36 +38,34 @@ class Intersection(threading.Thread):
         self.init_lights()
         self.current_cycle = 0
 
-        self.verif.put(self.name)
-        self.start()
+        self.verif.append(self.name)
 
     def run(self):
-        while True:
-            tick = self.tick.get()
-            self.inner_tick+=1
+        self.inner_tick+=1
 
-            # Manages Cars
-            self.update_lights()
-            self.simulate_cars()
-            cars_passing = self.update_cars()
+        # Manages Cars
+        self.update_lights()
+        self.simulate_cars()
+        cars_passing = self.update_cars()
 
-            # Algorithm Control
-            # self.region_update( self.region_com.get_nowait() )
-            self.alter_times()
+        # Algorithm Control
+        # self.region_update( self.region_com.get_nowait() )
+        self.alter_times()
 
-            # Data Collection
-            self.update_car_freq(cars_passing)
-            self.eval()
+        # Data Collection
+        self.update_car_freq(cars_passing)
+        self.eval()
 
-            # Verification
-            self.verif.put(self.name) 
+        # Verification
+        self.status()
+        self.verif.append(self.name) 
 
     """
     Status
     Print out necessary information
     """
     def status(self):
-        cprint("\t{}\t{}\t{}".format(self.name, self.cars_in_roads(), self.lights ), "blue")
+        cprint("\t{}\t{}\t".format(self.name, self.lights ), "blue")
 
     """
     Attaching Roads
@@ -98,8 +90,6 @@ class Intersection(threading.Thread):
 
         self.lights[ self.light_dir[self.current_cycle] ] = 1
 
-        print(self.cycle_times)
-
     def update_lights(self):
         cycle = self.light_dir[self.current_cycle]
         new_cycle = (self.current_cycle + 1) % len(self.light_dir)
@@ -120,26 +110,21 @@ class Intersection(threading.Thread):
     """
     Handle Cars
     """
-    
-    def cars_in_roads(self):
-        return { r:len(self.roads[r]["enter"].queue) for r in self.roads}   
-
     def update_cars(self):
         car_count = 0
         for r in self.roads:
-            self.roads[r]["enter"].update()
-            if self.lights[r] == 1 or self.lights[r] == 0:
-                if self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"], self.name):
-                    car_count += 1
+            if "enter" in self.roads[r]:
+                self.roads[r]["enter"].update()
+                if self.lights[r] == 1 or self.lights[r] == 0:
+                    if self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"]):
+                        car_count += 1
         return car_count
         
 
     def simulate_cars(self):
         for r in self.roads:
-            if random.random() < self.inject_rate:
+            if "enter" in self.roads[r]:
                 self.roads[r]["enter"].randomly_inject()
-            if random.random() < self.loss_rate:
-                self.roads[r]["enter"].randomly_remove()
 
     """
     Evaluation
@@ -156,5 +141,6 @@ class Intersection(threading.Thread):
     """
     Intersection Control
     """
-    def alter_times():
-        self.cycle_times = intersection_control.run(self.metrics, self.roads, self.cycle_times)
+    def alter_times(self):
+        pass
+        # self.cycle_times = intersection_control.run(self.metrics, self.roads, self.cycle_times)

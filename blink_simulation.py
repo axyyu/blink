@@ -1,78 +1,70 @@
 """
 Blink Simulation
-
-Not run on main thread
 """
 from dependencies import *
 from road_objects import *
 import configparser
 
-class BlinkSimulation(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-
+class BlinkSimulation():
+    def __init__(self, network, tick_limit=60, tick_delay=1):
+        """ Ticks """
         self.tick = 0
-        self.road_network = {}
-        self.inject_rate = .5
-        self.length = 0
-        self.GUI = True
+        self.tick_limit = tick_limit
+        self.tick_delay = tick_delay
+
+        """ Network """
+        self.network = network
+        self.threads = []
         self.size = 0
 
+    def start(self):
+        self.create_network()
+        self.init()
+        self.run()
+
     def init(self):
-        for k in self.road_network:
-            self.road_network[k].init()
-        self.size = len(self.road_network)
+        for t in self.threads:
+            t.init()
         self.verify_network()
-        self.start()
+    
+    def run_threads(self):
+        for t in self.threads:
+            t.run()
 
     def run(self):
         cprint("\nRunning Network...\n","yellow")
-        while self.tick < self.length:
-            self.thread_check()
-            self.update_tick()
-            self.verify_network()
-            self.status()
 
+        while self.tick < self.tick_limit:
+            self.update_tick()
+            self.run_threads()
+            self.verify_network()
+        
         cprint("\nEnded Simulation\n","yellow")
 
     """
     Network
     """
-    def configure(self, config_file):
-        config = configparser.ConfigParser()
-        config.read(config_file)
+    def create_network(self):
+        region = Region()
 
-        self.length = float(config["PARAMETERS"]["SimulationLength"])
-        self.GUI = (float(config["PARAMETERS"]["GUI"]) == 1)
-        self.tick_delay = float(config["PARAMETERS"]["TickDelay"])
+        intersection_threads = {}
+        for i,v in tqdm(self.network.items(), desc="Populating Intersections"):
+            if i not in intersection_threads:
+                intersection = Intersection(v["name"], region.intersection)
+                intersection_threads[i] = intersection
+        
+        for i,v in tqdm(self.network.items(), desc="Populating Roads"):
+            for r in v["roads"]:
+                road = Road(r["name"], r["length"], r["lanes"], r["inject_rate"], r["exit_rate"])
+                
+                intersection_threads[i].attach_road("exit", road)
 
-    def create_network(self, network_file):
-        content = []
+                if r["end"]:
+                    intersection_threads[r["end"]].attach_road("enter", road)
 
-        with open(network_file, 'r') as f:
-            content = f.readlines()
-
-        for c in content:
-            b = c.lstrip().rstrip()
-            if len(b) <= 0:
-                continue
-            if b[0] == "#":
-                region = Region(queue.Queue(), b[1:])
-                self.road_network[region.name] = region
-            if b[0] == "-":
-                int_info = b[1:].split(",")
-                intersection = Intersection(queue.Queue(), int_info[0], region.id, region.int_com, int_info[1], int_info[2])
-                self.road_network[intersection.name] = intersection
-            if b[0] == "*":
-                road_info = b[1:].split(",")
-                for r in range(len(road_info[1:-3])):
-                    road = Road(road_info[0], road_info[r+2], road_info[r+1], int(road_info[-2]), int(road_info[-1]))
-                    self.road_network[road_info[r+1].rstrip()].attach_road("enter", road)
-                    self.road_network[road_info[r+2].rstrip()].attach_road("exit", road)
-
-                    road = Road(road_info[0], road_info[r+1], road_info[r+2], int(road_info[-2]), int(road_info[-1]))
-                    self.road_network[road_info[r+2].rstrip()].attach_road("enter", road)
-                    self.road_network[road_info[r+1].rstrip()].attach_road("exit", road)
+        self.threads.append(region)
+        for i,v in tqdm(intersection_threads.items(), desc="Appending threads"):
+            self.threads.append(v)
 
     """
     Running the Simulation
@@ -80,23 +72,14 @@ class BlinkSimulation(threading.Thread):
     def update_tick(self):
         cprint("{}".format(self.tick), "magenta")
 
-        for k in self.road_network:
-            self.road_network[k].tick.put(self.tick)
+        for t in self.threads:
+            t.tick = self.tick
         
         time.sleep(self.tick_delay)
         self.tick += 1
 
-    def thread_check(self):
-        count = threading.active_count() - 1
-        if self.size == count:
-            cprint("\nThread count doesn't match: {} != {}\n".format(count, self.size), "yellow")
-
     def verify_network(self):
-        for k in self.road_network:
-            if k != self.road_network[k].verif.get():
-                cprint("Error: Verication is incorrect for {} {}".format(k, self.road_network[k].name), "red")
-                raise ValueError("Code broke")
-
-    def status(self):
-        for k in self.road_network:
-            self.road_network[k].status()
+        for t in self.threads:
+            if t.name != t.verif.pop():
+                cprint("Error: Verication is incorrect for {}".format(t.name), "red")
+                raise ValueError("Verification Error")

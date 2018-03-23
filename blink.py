@@ -1,5 +1,6 @@
 from dependencies import *
 import argparse
+import pickle
 
 from blink_simulation import BlinkSimulation
 
@@ -14,30 +15,33 @@ cyan - intersection
 white
 """
 
-"""
-NEEDED LATER FOR TERMINAL INPUT
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('network', metavar='N', type=argparse.FileType('r'), help='A file containing a road network.')
-# parser.add_argument('--sum', dest='accumulate', action='store_const',const=sum, default=max, help='sum the integers (default: find the max)')
+"""
+TERMINAL INPUT
+"""
+parser = argparse.ArgumentParser(description='{}{}{}'.format(bcolors.WARNING,
+"Blink Traffic Simulation - This program simulates the passage of cars and pedestrians through a region."
+,bcolors.ENDC))
+parser.add_argument('network', help='{}{}{}'.format(bcolors.OKGREEN,'Network file.',bcolors.ENDC))
+parser.add_argument('-t', help='Maximum number of ticks.')
+parser.add_argument('-d', help='Delay in seconds between each tick.')
 args = parser.parse_args()
-print(args.network)
-"""
 
-"""
-Helper
-"""
-def check_input():
-    if len(sys.argv) < 2:
-        cprint("\nUsage: blink.py <network> <ticks> \n", 'yellow')
-        sys.exit()
+f = open("{}".format(args.network), "rb")
+network = pickle.load(f)
 
-check_input()
-network_file = sys.argv[1]
-config_file = "blink_conf.conf"
+sim = BlinkSimulation(network)
+sim.start()
 
+print(args)
+# tick_limit=args, tick_delay=1
 
-sim = BlinkSimulation()
-sim.configure(config_file)
-sim.create_network(network_file)
-sim.init()
