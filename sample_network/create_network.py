@@ -37,7 +37,7 @@ for r in tqdm(range(len(shapes)), desc="Finding Intersections"):
                     "road_ids": set(),
                     "road_names": set()
                 }
-            
+
             intersection_map[p]["road_ids"].add(r)
             intersection_map[p]["road_names"].add(road_name)
 
@@ -68,21 +68,23 @@ for key,value in tqdm(intersection_map.items(), desc="Setting Up Roads"):
                 "name": records[r][11],
                 "length": None,
                 "lanes": None,
-                "inject_rate": None,
-                "exit_rate": None,
+                "am_inject_rate": None,
+                "pm_exit_rate": None,
+                "yellow_clearance": None,
                 "end": None
             }
         else:
             end = location_int[0]
-        
+
             speed_limit = records[r][42]
             road_length = (( (key[0]-end[0])**2 + (key[1]-end[1])**2 ) ** .5) * 69
             average_vehicle_length = 0.0029829545
 
             speed_limit = speed_limit / 3600 # CONVERT FROM MPH TO MPS
-            delay_distance = speed_limit * 3 # DELAY TIME IS SPEED * 2 SECONDS
+            delay_distance = speed_limit * 2 # DELAY TIME IS SPEED * 2 SECONDS
             car_distance = average_vehicle_length + delay_distance
             length = int(road_length / car_distance)
+            yellow_clearance = max(3, int(1.4 + (1.47*speed_limit)/(2*10)) ) # Reaction time as 1.4s
 
             if length == 0:
                 length = 1
@@ -90,31 +92,32 @@ for key,value in tqdm(intersection_map.items(), desc="Setting Up Roads"):
             road_type = records[r][19]
 
             lanes = 1
-            inject_rate = .1
-            exit_rate = .9
+            am_inject_rate = .64
+            pm_exit_rate = .7
             if road_type == "PRIMARY":
-                inject_rate = .7
-                exit_rate = .3
+                am_inject_rate = 0
+                pm_exit_rate = 0
                 lanes = 4
             if road_type == "SECONDARY":
-                inject_rate = .6
-                exit_rate = .4
+                am_inject_rate = .1
+                pm_exit_rate = .1
                 lanes = 3
             if road_type == "TERTIARY":
-                inject_rate = .5
-                exit_rate = .5
+                am_inject_rate = .13
+                pm_exit_rate = .28
                 lanes = 2
 
             road = {
                 "name": records[r][11],
                 "length": length,
                 "lanes": lanes,
-                "inject_rate": inject_rate,
-                "exit_rate": exit_rate,
+                "am_inject_rate": am_inject_rate,
+                "pm_exit_rate": pm_exit_rate,
+                "yellow_clearance": yellow_clearance,
                 "end": end
             }
         value["roads"].append(road)
-        
+
 with open("fairfax", 'wb') as f:
     pickle.dump(intersection_map, f, protocol=pickle.HIGHEST_PROTOCOL)
 

@@ -6,14 +6,16 @@ from dependencies import *
 from person_objects import *
 
 class Road():
-    def __init__(self, name, length, lanes, inject_rate, exit_rate):
+    def __init__(self, name, length, lanes, yellow_clearance, am_inject_rate, pm_exit_rate):
         self.id = uuid.uuid4()
         self.name = name
 
         self.length = length
         self.lanes = lanes
-        self.inject_rate = inject_rate
-        self.exit_rate = exit_rate
+        self.yellow_clearance = yellow_clearance
+
+        self.am_inject_rate = am_inject_rate
+        self.pm_exit_rate = pm_exit_rate
         self.queue = []
 
         self.init()
@@ -45,6 +47,18 @@ class Road():
                                 self.queue[lane][slot] == 0
                                 break
 
+    def setup_ratios(self, day):
+        """
+        1 - Night
+        0 - Day
+        """
+        if day >= 0:
+            self.inject_rate = self.am_inject_rate * day
+            self.exit_rate = .1 * day
+        else:
+            self.inject_rate = .1 * abs(day)
+            self.exit_rate = self.pm_exit_rate * abs(day)
+
     """
     Road Detection Info
     """
@@ -54,7 +68,7 @@ class Road():
             for lane in random.sample(range(self.lanes), self.lanes):
                 if self.queue[lane][self.length-1] != 0:
                     count+=1
-            return 0
+            return count
         return 0
 
     """ Returns open lane """
@@ -65,7 +79,7 @@ class Road():
                     return lane
             return None
         return False
-    
+
     """ Returns front lane """
     def detect_front(self):
         if self.length:
@@ -91,20 +105,26 @@ class Road():
                     if self.queue[lane][slot] != 0:
                         self.queue[lane][slot] == 0
         return None
-    
+
     def pass_vehicles(self, target):
         target_lane = target.detect_back()
         my_front = self.detect_front()
         if target_lane and my_front:
             target.queue[target_lane][target.length-1] = self.queue[my_front][0]
             self.queue[my_front][0] = 0
-    
+
     """
     Vehicle Injection and Removal
     """
-    def randomly_inject(self):
+    def randomly_inject(self, day):
+        self.setup_ratios(day)
+
+        inject = exit = 0
         if self.length:
             if random.random() < self.exit_rate:
                 self.remove_vehicle()
+                exit+=1
             if random.random() < self.inject_rate:
                 self.add_vehicle()
+                inject+=1
+        return inject, exit

@@ -32,8 +32,8 @@ parser = argparse.ArgumentParser(description='{}{}{}'.format(bcolors.WARNING,
 "Blink Traffic Simulation - This program simulates the passage of cars and pedestrians through a region."
 ,bcolors.ENDC))
 parser.add_argument('network', help='{}{}{}'.format(bcolors.OKGREEN,'Network file.',bcolors.ENDC))
-parser.add_argument('-t', help='Maximum number of ticks.')
-parser.add_argument('-d', help='Delay in seconds between each tick.')
+parser.add_argument('-t', help='Maximum number of ticks (seconds).')
+parser.add_argument('-d', help='Delay in seconds between each tick (seconds).')
 args = parser.parse_args()
 
 f = open("{}".format(args.network), "rb")
@@ -44,4 +44,3 @@ sim.start()
 
 print(args)
 # tick_limit=args, tick_delay=1
-

@@ -26,7 +26,7 @@ class BlinkSimulation():
         for t in self.threads:
             t.init()
         self.verify_network()
-    
+
     def run_threads(self):
         for t in self.threads:
             t.run()
@@ -38,7 +38,7 @@ class BlinkSimulation():
             self.update_tick()
             self.run_threads()
             self.verify_network()
-        
+
         cprint("\nEnded Simulation\n","yellow")
 
     """
@@ -52,11 +52,12 @@ class BlinkSimulation():
             if i not in intersection_threads:
                 intersection = Intersection(v["name"], region.intersection)
                 intersection_threads[i] = intersection
-        
+
         for i,v in tqdm(self.network.items(), desc="Populating Roads"):
             for r in v["roads"]:
-                road = Road(r["name"], r["length"], r["lanes"], r["inject_rate"], r["exit_rate"])
-                
+                r.keys()
+                road = Road(r["name"], r["length"], r["lanes"], r["yellow_clearance"], r["am_inject_rate"], r["pm_exit_rate"])
+
                 intersection_threads[i].attach_road("exit", road)
 
                 if r["end"]:
@@ -74,7 +75,7 @@ class BlinkSimulation():
 
         for t in self.threads:
             t.tick = self.tick
-        
+
         time.sleep(self.tick_delay)
         self.tick += 1
 
