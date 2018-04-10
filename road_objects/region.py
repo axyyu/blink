@@ -12,8 +12,12 @@ class Region():
 
         self.tick = 0 # Receive ticks from simulation
         self.verif = [] # Verification with sim
-        self.intersection = [] # Communication with int
-    
+        self.intersections = {} # Communication with int
+
+        # Evaluation
+        self.data = {}
+        self.metrics = {}
+
     def __str__(self):
         return self.name
 
@@ -23,10 +27,21 @@ class Region():
     def init(self):
         self.verif.append(self.name)
 
+    def add_intersection(self, int_id, obj):
+        self.intersections[int_id] = obj
+        return self.intersections[int_id]
+
     def run(self):
+        # Data Evaluation
+        self.collect_data()
+        self.eval()
+
+        # Algorithm Control
         self.process_intersection_data()
-        self.verif.append(self.name) # Verification
-    
+
+        # Verification
+        self.verif.append(self.name)
+
     """
     Status
     Print out necessary information
@@ -35,7 +50,29 @@ class Region():
         pass
 
     """
+    Data Collection
+    """
+    def init_data(self):
+        fields = [
+        ]
+        for f in fields:
+            self.data[f] = []
+
+    def collect_data(self):
+        pass
+
+    def init_eval(self):
+        fields = [
+        ]
+        for f in fields:
+            self.eval[f] = None
+
+    def eval(self):
+        pass
+
+    """
     Region Control
     """
     def process_intersection_data(self):
+        # multipliers = region_control.run(self.day, self.metrics, self.intersections.keys())
         pass

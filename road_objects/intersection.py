@@ -7,14 +7,14 @@ from input_objects import intersection_control
 from person_objects import *
 
 class Intersection():
-    def __init__(self, name, region_com):
+    def __init__(self, name):
         self.id = uuid.uuid4()
         self.name = name
 
         """ Communication """
         self.tick = 0
         self.verif = [] # Verification with sim
-        self.region = region_com
+        self.region = []
 
         self.inner_tick = 0
         self.roads = {}
@@ -27,7 +27,7 @@ class Intersection():
         self.light_dir = []
         self.current_cycle = 0
 
-        # Evaluation
+        """ Evaluation """
         self.data = {}
         self.metrics = {}
 
@@ -44,6 +44,9 @@ class Intersection():
 
         self.verif.append(self.name)
 
+    def set_region(self, region_com):
+        self.region = region_com
+
     def run(self):
         self.inner_tick+=1
 
@@ -57,11 +60,11 @@ class Intersection():
         self.eval()
 
         # Algorithm Control
-        # self.region_update( self.region_com.get_nowait() )
+        self.region_update()
         self.alter_times()
 
         # Verification
-        self.status()
+        # self.status()
         self.verif.append(self.name)
 
     """
@@ -219,8 +222,10 @@ class Intersection():
 
     Times can't be < Yellow Clearance Interval
     """
+    def region_update(self):
+        pass
     def alter_times(self):
-        new_cycle_times = intersection_control.run(self.metrics, self.roads, self.cycle_times)
+        new_cycle_times = intersection_control.run(self.day, self.metrics, self.cycle_times)
         try:
             if new_cycle_times.keys() != self.roads.keys():
                 raise ValueError('Roads do not match.', set(new_cycle_times.keys()).symmetric_difference(set(self.roads.keys())))
@@ -229,4 +234,5 @@ class Intersection():
                     raise ValueError('New cycle times are shorter than required yellow clearance time.', r, new_cycle_times[r])
             self.cycle_times = new_cycle_times
         except Exception as e:
-            print(e.args)
+            pass
+            # print("ALTER TIMES ERROR ", e.args)

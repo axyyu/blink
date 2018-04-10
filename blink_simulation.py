@@ -9,8 +9,8 @@ class BlinkSimulation():
     def __init__(self, network, tick_limit=60, tick_delay=1):
         """ Ticks """
         self.tick = 0
-        self.tick_limit = tick_limit
-        self.tick_delay = tick_delay
+        self.tick_limit = int(tick_limit)
+        self.tick_delay = int(tick_delay)
 
         """ Network """
         self.network = network
@@ -50,7 +50,8 @@ class BlinkSimulation():
         intersection_threads = {}
         for i,v in tqdm(self.network.items(), desc="Populating Intersections"):
             if i not in intersection_threads:
-                intersection = Intersection(v["name"], region.intersection)
+                intersection = Intersection(v["name"])
+                intersection.set_region(region.add_intersection(intersection.id))
                 intersection_threads[i] = intersection
 
         for i,v in tqdm(self.network.items(), desc="Populating Roads"):
