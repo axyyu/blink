@@ -3,10 +3,10 @@ Blink Simulation
 """
 from dependencies import *
 from road_objects import *
-import configparser
+
 
 class BlinkSimulation():
-    def __init__(self, network, tick_limit=60, tick_delay=1):
+    def __init__(self, network, tick_limit, tick_delay):
         """ Ticks """
         self.tick = 0
         self.tick_limit = int(tick_limit)
@@ -16,6 +16,9 @@ class BlinkSimulation():
         self.network = network
         self.threads = []
         self.size = 0
+
+        """ Data """
+        self.data = []
 
     def start(self):
         self.create_network()
@@ -30,14 +33,18 @@ class BlinkSimulation():
     def run_threads(self):
         for t in self.threads:
             t.run()
+            t.status()
 
     def run(self):
         cprint("\nRunning Network...\n","yellow")
 
-        while self.tick < self.tick_limit:
+        for self.tick in range(self.tick_limit):
             self.update_tick()
             self.run_threads()
             self.verify_network()
+            self.data.append({k:v for k,v in self.region.metrics.items()})
+            # self.region.status()
+        self.status()
 
         cprint("\nEnded Simulation\n","yellow")
 
@@ -45,13 +52,13 @@ class BlinkSimulation():
     Network
     """
     def create_network(self):
-        region = Region()
+        self.region = Region()
 
         intersection_threads = {}
         for i,v in tqdm(self.network.items(), desc="Populating Intersections"):
             if i not in intersection_threads:
                 intersection = Intersection(v["name"])
-                intersection.set_region(region.add_intersection(intersection.id))
+                intersection.add_region(self.region.add_intersection(intersection.id,intersection))
                 intersection_threads[i] = intersection
 
         for i,v in tqdm(self.network.items(), desc="Populating Roads"):
@@ -64,24 +71,32 @@ class BlinkSimulation():
                 if r["end"]:
                     intersection_threads[r["end"]].attach_road("enter", road)
 
-        self.threads.append(region)
-        for i,v in tqdm(intersection_threads.items(), desc="Appending threads"):
+        self.threads.append(self.region)
+        for i,v in tqdm(intersection_threads.items(), desc="Appending objects"):
             self.threads.append(v)
 
     """
     Running the Simulation
     """
+    def time_multiplier(self, sec):
+        return np.sin(sec * (np.pi/1800))
+
     def update_tick(self):
-        cprint("{}".format(self.tick), "magenta")
+        cprint("{}".format(self.tick), "magenta", flush=True)
 
         for t in self.threads:
-            t.tick = self.tick
+            t.tick = self.time_multiplier(self.tick)
 
         time.sleep(self.tick_delay)
-        self.tick += 1
 
     def verify_network(self):
         for t in self.threads:
             if t.name != t.verif.pop():
                 cprint("Error: Verication is incorrect for {}".format(t.name), "red")
                 raise ValueError("Verification Error")
+
+    """
+    Compiling Results
+    """
+    def status(self):
+        pass

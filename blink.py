@@ -1,43 +1,14 @@
 from dependencies import *
-import argparse
+from blink_simulation import BlinkSimulation
+from configparser import ConfigParser
 import pickle
 
-from blink_simulation import BlinkSimulation
+cp = ConfigParser()
+cp.read("config.ini")
+network_dir = cp.get("DEFAULT","network_file")
 
-"""
-grey
-red - error messages
-green - productivity
-yellow - warning messages
-blue
-magenta - tick
-cyan - intersection
-white
-"""
+with open(network_dir, "rb") as f:
+    network = pickle.load(f)
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-"""
-TERMINAL INPUT
-"""
-parser = argparse.ArgumentParser(description='{}{}{}'.format(bcolors.WARNING,
-"Blink Traffic Simulation - This program simulates the passage of cars and pedestrians through a region."
-,bcolors.ENDC))
-parser.add_argument('network', help='{}{}{}'.format(bcolors.OKGREEN,'Network file.',bcolors.ENDC))
-parser.add_argument('-t', nargs='?', const=60, default=60, help='Maximum number of ticks (seconds).')
-parser.add_argument('-d', nargs='?', const=1, default=1, help='Delay in seconds between each tick (seconds).')
-args = parser.parse_args()
-
-f = open("{}".format(args.network), "rb")
-network = pickle.load(f)
-
-sim = BlinkSimulation(network, args.t, args.d)
+sim = BlinkSimulation(network, cp.get("DEFAULT","sim_length"), cp.get("DEFAULT","tick_delay"))
 sim.start()

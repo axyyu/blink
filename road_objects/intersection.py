@@ -14,7 +14,7 @@ class Intersection():
         """ Communication """
         self.tick = 0
         self.verif = [] # Verification with sim
-        self.region = []
+        self.region = {}
 
         self.inner_tick = 0
         self.roads = {}
@@ -40,11 +40,12 @@ class Intersection():
     def init(self):
         self.init_lights()
         self.init_data()
+        self.init_eval()
         self.current_cycle = 0
 
         self.verif.append(self.name)
 
-    def set_region(self, region_com):
+    def add_region(self, region_com):
         self.region = region_com
 
     def run(self):
@@ -64,21 +65,17 @@ class Intersection():
         self.alter_times()
 
         # Verification
-        # self.status()
+        self.status()
         self.verif.append(self.name)
-
-    """
-    Helpers
-    """
-    def time_multiplier(self, sec):
-        return np.sin(sec * (3600/np.pi))
 
     """
     Status
     Print out necessary information
     """
     def status(self):
-        cprint("\t{}\t{}\t".format(self.name, self.lights ), "blue")
+        print(self.tick)
+        pprint(self.data)
+        pprint(self.metrics)
 
     """
     Attaching Roads
@@ -144,7 +141,7 @@ class Intersection():
         inject_total = 0
         for r in self.roads:
             if "enter" in self.roads[r]:
-                inject, exit = self.roads[r]["enter"].randomly_inject(self.time_multiplier(self.tick))
+                inject, exit = self.roads[r]["enter"].randomly_inject(self.tick)
                 inject_total += inject
         self.data["AFR"].append(inject_total)
 
@@ -200,7 +197,7 @@ class Intersection():
             "SMAA"
         ]
         for f in fields:
-            self.eval[f] = None
+            self.metrics[f] = 0
 
     def eval(self):
         if len(self.data["Q"]) > self.data["C"][-1]:
@@ -216,16 +213,21 @@ class Intersection():
         if self.data["DFR"][-1] != 0:
             self.metrics["FR"] = self.data["AFR"][-1]/self.data["DFR"][-1]
 
+    """
+    Region Weights
+
+    Change times from weights
+    """
+    def region_update(self):
+        weight = self.region[self.id]
 
     """
     Intersection Control
 
     Times can't be < Yellow Clearance Interval
     """
-    def region_update(self):
-        pass
     def alter_times(self):
-        new_cycle_times = intersection_control.run(self.day, self.metrics, self.cycle_times)
+        new_cycle_times = intersection_control.run(self.tick, self.data, self.metrics, self.cycle_times)
         try:
             if new_cycle_times.keys() != self.roads.keys():
                 raise ValueError('Roads do not match.', set(new_cycle_times.keys()).symmetric_difference(set(self.roads.keys())))

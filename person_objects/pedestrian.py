@@ -1,11 +1,10 @@
 """
 Pedestrian Object
 
-Determines pedestrian position and probable destination 
+Determines pedestrian position and probable destination
 
 """
 from dependencies import *
-from input_objects import destination_control
 
 class Pedestrian():
     def __init__(self):

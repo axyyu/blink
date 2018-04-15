@@ -5,7 +5,6 @@ Determines car position and probable destination
 
 """
 from dependencies import *
-from input_objects import destination_control
 
 class Vehicle():
     def __init__(self):
