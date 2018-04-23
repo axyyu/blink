@@ -12,3 +12,9 @@ pip-selfcheck.json
 *.pyc
 
 sample_network/shapefiles/
+
+*.ipynb
+
+sample_network/FCPS_shapefile/
+
+sample_network/DC_shapefile/
