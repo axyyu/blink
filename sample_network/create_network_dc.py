@@ -9,7 +9,7 @@ Ignores exits and highways are they are less likely to have traffic lights
 Ignores intersections with the same road name as they are usually neighorhood roads without lights
 """
 import shapefile
-sf = shapefile.Reader("shapefiles/Roadway_Centerlines")
+sf = shapefile.Reader("DC_shapefile/Street_Centerlines")
 
 records = sf.records()
 shapes = sf.shapes()
@@ -20,15 +20,15 @@ Finds Intersections between Road Vectors
 intersection_map = {}
 
 road_types = [
-    "LOCAL ROAD",
-    "PRIMARY",
-    "SECONDARY",
-    "TERTIARY"
+    "STREET",
+    "ROAD",
+    "AVENUE",
+    "DRIVE"
 ]
 
 for r in tqdm(range(len(shapes)), desc="Finding Intersections"):
-    road_name = records[r][11]
-    road_type = records[r][19]
+    road_name = records[r][9]
+    road_type = records[r][14]
 
     if road_type in road_types: # REMOVES BAD ROADS
         for p in shapes[r].points:
@@ -65,7 +65,7 @@ for key,value in tqdm(intersection_map.items(), desc="Setting Up Roads"):
 
         if len(location_int) < 1:
             road = {
-                "name": records[r][11],
+                "name": records[r][9],
                 "length": None,
                 "lanes": None,
                 "am_inject_rate": None,
@@ -76,9 +76,9 @@ for key,value in tqdm(intersection_map.items(), desc="Setting Up Roads"):
         else:
             end = location_int[0]
 
-            speed_limit = records[r][42]
-            road_length = (( (key[0]-end[0])**2 + (key[1]-end[1])**2 ) ** .5) * 69
-            average_vehicle_length = 0.0029829545
+            speed_limit = 25 + 10 #records[r][42]
+            road_length = records[r][-1] # In meters
+            average_vehicle_length = 4.5 # In meters
 
             speed_limit = speed_limit / 3600 # CONVERT FROM MPH TO MPS
             delay_distance = speed_limit * 2 # DELAY TIME IS SPEED * 2 SECONDS
@@ -86,29 +86,17 @@ for key,value in tqdm(intersection_map.items(), desc="Setting Up Roads"):
             length = int(road_length / car_distance)
             yellow_clearance = max(3, int(1.4 + (1.47*speed_limit)/(2*10)) ) # Reaction time as 1.4s
 
-            if length == 0:
+            if length < 1:
                 length = 1
 
-            road_type = records[r][19]
+            road_type = records[r][14]
 
             lanes = 1
             am_inject_rate = .64
             pm_exit_rate = .7
-            if road_type == "PRIMARY":
-                am_inject_rate = 0
-                pm_exit_rate = 0
-                lanes = 4
-            if road_type == "SECONDARY":
-                am_inject_rate = .1
-                pm_exit_rate = .1
-                lanes = 3
-            if road_type == "TERTIARY":
-                am_inject_rate = .13
-                pm_exit_rate = .28
-                lanes = 2
 
             road = {
-                "name": records[r][11],
+                "name": records[r][9],
                 "length": length,
                 "lanes": lanes,
                 "am_inject_rate": am_inject_rate,
@@ -118,17 +106,17 @@ for key,value in tqdm(intersection_map.items(), desc="Setting Up Roads"):
             }
         value["roads"].append(road)
 
-with open("fairfax", 'wb') as f:
+with open("washington", 'wb') as f:
     pickle.dump(intersection_map, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-with open("fairfax.txt", 'w') as f:
-    f.write("#{}\n".format("Fairfax"))
-
-    f.write("\n")
-
-    for k,v in tqdm(intersection_map.items(), desc="Write Ints"):
-        f.write("-{}\n".format(v["name"]))
-        for r in v["roads"]:
-            if r["end"] is not None:
-                r["end"] = intersection_map[r["end"]]["name"]
-            f.write("{},{},{},{}\n".format(r["name"], r["length"], r["lanes"], r["end"]))
+# with open("fairfax.txt", 'w') as f:
+#     f.write("#{}\n".format("Fairfax"))
+#
+#     f.write("\n")
+#
+#     for k,v in tqdm(intersection_map.items(), desc="Write Ints"):
+#         f.write("-{}\n".format(v["name"]))
+#         for r in v["roads"]:
+#             if r["end"] is not None:
+#                 r["end"] = intersection_map[r["end"]]["name"]
+#             f.write("{},{},{},{}\n".format(r["name"], r["length"], r["lanes"], r["end"]))

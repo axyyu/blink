@@ -11,7 +11,6 @@ class Region():
         self.name = name
 
         self.tick = 0 # Receive ticks from simulation
-        self.verif = [] # Verification with sim
         self.intersections = {} # Communication with int
         self.intersection_weights = {}
 
@@ -26,7 +25,6 @@ class Region():
 
     def init(self):
         self.init_eval()
-        self.verif.append(self.name)
 
     def add_intersection(self, int_id, obj):
         self.intersections[int_id] = obj
@@ -34,21 +32,26 @@ class Region():
         return self.intersection_weights
 
     def run(self):
-        # Data Evaluation
-        self.eval()
+        self.time = self.time_multiplier(self.tick)
 
+    def eval(self):
+        # Data Evaluation
+        self.evaluate_data()
+
+    def process(self):
         # Algorithm Control
         self.alter_weights()
-
-        # Verification
-        self.verif.append(self.name)
 
     """
     Status
     Print out necessary information
     """
     def status(self):
-        pprint(self.metrics)
+        for f,v in self.metrics.items():
+            print(f,v[-1])
+
+    def time_multiplier(self, sec):
+        return np.sin(sec * (np.pi/1800))
 
     """
     Evalutation
@@ -68,24 +71,29 @@ class Region():
         "AMD",
         "AFR",
         "AQO",
-        "ASMAD",
-        "ASMAA",
         "HDI"
         ]
         for f in fields:
-            self.metrics[f] = 0
+            self.metrics[f] = []
 
-    def eval(self):
+    def evaluate_data(self):
+        self.size = len(self.intersections)
         for f in self.metrics:
-            self.metrics[f] = 0
+            value = 0
             for id, intersection in self.intersections.items():
+                # print(intersection.metrics, intersection.data)
                 if f != "HDI":
-                    self.metrics[f] += intersection.metrics[f[1:]]
+                    if len(intersection.metrics[f[1:]]) > 0:
+                        value += intersection.metrics[f[1:]][-1]
                 else:
-                    if intersection.metrics["FR"] > 1:
-                        self.metrics["HDI"] += 1
+                    if len(intersection.metrics["FR"]) > 1:
+                        if intersection.metrics["FR"][-1] > 1:
+                            value += 1
+            # print(f, self.metrics[f])
             if f != "HDI":
-                self.metrics[f] /= 2
+                self.metrics[f].append(value / self.size)
+            else:
+                self.metrics[f].append(value)
 
     """
     Region Control
@@ -93,7 +101,7 @@ class Region():
     Weight output (user sets the scale)
     """
     def alter_weights(self):
-        intersection_weights = region_control.run(self.tick, self.metrics, self.intersections)
+        intersection_weights = region_control.run(self.time, self)
 
         try:
             if intersection_weights.keys() != self.intersection_weights.keys():

@@ -1,33 +1,69 @@
-"""
-Intersection Object
-
-"""
 from dependencies import *
 from input_objects import intersection_control
 from person_objects import *
 
+#####################################################################
+#       Intersection
+# Manages traffic flow between intersections and maintains cycle
+# times. Tracks data on the departures and arrivals.
+#####################################################################
+
 class Intersection():
-    def __init__(self, name):
+    """
+    Intersection
+
+    tick - in seconds, set by the BlinkSimulation, used to obtain time of day
+    region - intersection weights determined by Region object
+    roads - dictionary of roads
+        roads [ road name ] [ type(enter|exit) ] = road object
+
+    lights - dictionary of light status
+        lights [ road name ] = type(-1|0|1)
+    light_dir - list of road names (used for identifing current green light)
+    yellow_clearance - dictionary of yellow clearance times for each road
+        yellow_clearance [ road name ] = float (seconds)
+
+    inner_tick - ticks elapsed in current cycle
+    cycle_times - current cycle times for each road
+        cycle_times [ road name ] = int (ticks for each cycle)
+    current_cycle - the current cycle (index in light_dir)
+
+    arrivals - number of arrivals per tick
+    departures - number of departures per tick
+    data - dictionary of various data points
+    metrics - dictionary of various calculations
+    """
+
+    def __init__(self, name, region_com):
+        """
+        Initializes the intersection.
+
+        Arguments:
+        name - name of the intersection
+        """
         self.id = uuid.uuid4()
         self.name = name
 
-        """ Communication """
+        # Communication with simulation and regions
         self.tick = 0
-        self.verif = [] # Verification with sim
-        self.region = {}
+        self.region = region_com
 
-        self.inner_tick = 0
+        # Road Setup
         self.roads = {}
 
+        # Light Setup
         self.lights = {}
-        self.cycle_times = {}
         self.light_dir = []
         self.yellow_clearance = {}
 
-        self.light_dir = []
+        # Cycle Setup
+        self.inner_tick = 0
+        self.cycle_times = {}
         self.current_cycle = 0
 
-        """ Evaluation """
+        # Data Setup
+        self.arrivals = 0
+        self.departures = 0
         self.data = {}
         self.metrics = {}
 
@@ -43,30 +79,24 @@ class Intersection():
         self.init_eval()
         self.current_cycle = 0
 
-        self.verif.append(self.name)
-
-    def add_region(self, region_com):
-        self.region = region_com
-
     def run(self):
         self.inner_tick+=1
+        self.time = self.time_multiplier(self.tick)
 
         # Manages Cars
         self.update_lights()
         self.simulate_cars()
         self.update_cars()
 
+    def eval(self):
         # Data Evaluation
         self.collect_data()
-        self.eval()
+        self.evaluate_data()
 
+    def process(self):
         # Algorithm Control
         self.region_update()
         self.alter_times()
-
-        # Verification
-        self.status()
-        self.verif.append(self.name)
 
     """
     Status
@@ -74,8 +104,14 @@ class Intersection():
     """
     def status(self):
         print(self.tick)
-        pprint(self.data)
-        pprint(self.metrics)
+        for r in self.roads:
+            if "enter" in self.roads[r]:
+                print(self.roads[r]["enter"].length)
+        # pprint(self.data)
+        # pprint(self.metrics)
+
+    def time_multiplier(self, sec):
+        return np.sin(sec * (np.pi/1800))
 
     """
     Attaching Roads
@@ -126,24 +162,28 @@ class Intersection():
     """
     Handle Cars
     """
+    def alert(self, tick, num):
+        self.arrivals += num
+
     def update_cars(self):
-        car_count = 0
         for r in self.roads:
+            car_count = 0
             if "enter" in self.roads[r]:
                 self.roads[r]["enter"].update()
                 if self.lights[r] == 1 or self.lights[r] == 0:
                     if self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"]):
-                        car_count += 1
-        self.data["DFR"].append(car_count)
-
+                        self.departures += car_count
+            try:
+                self.roads[r]["exit"].intersection.alert(car_count)
+            except:
+                pass
 
     def simulate_cars(self):
-        inject_total = 0
         for r in self.roads:
             if "enter" in self.roads[r]:
-                inject, exit = self.roads[r]["enter"].randomly_inject(self.tick)
-                inject_total += inject
-        self.data["AFR"].append(inject_total)
+                inject, exit = self.roads[r]["enter"].randomly_inject(self.time)
+                self.arrivals += inject
+                self.departures += exit
 
     """
     Data Collection
@@ -164,27 +204,29 @@ class Intersection():
             self.data[f] = []
 
     def collect_data(self):
+        self.data["AFR"].append(self.arrivals)
+        self.data["DFR"].append(self.departures)
+        self.arrivals = 0
+        self.departures = 0
+
         queue_length = 0
         for r in self.roads:
             if "enter" in self.roads[r]:
                 queue_length = self.roads[r]["enter"].count_vehicles()
         self.data["Q"].append(queue_length)
-
         self.data["C"].append(sum([self.cycle_times[r] for r in self.cycle_times]))
 
     """
     Evaluation
 
-    MA - Mean Number of Arrivals/Cycle
-    MD - Mean Number of Departures/Cycle
+    MA - Number of Arrivals/Cycle
+    MD - Number of Departures/Cycle
+
     I - Variance of Number of Arrivals/MA
 
     FR - Flow Ratio (AFR/DFR)
 
     QO - Queue Overflow Estimate [(2x-1)I]/[2(1-x)] x>=.5
-
-    SMAD - Simple Moving Average Departures
-    SMAA - Simple Moving Average Arrivals
     """
     def init_eval(self):
         fields = [
@@ -192,26 +234,30 @@ class Intersection():
             "MD",
             "I",
             "FR",
-            "QO",
-            "SMAD",
-            "SMAA"
+            "QO"
         ]
         for f in fields:
-            self.metrics[f] = 0
+            self.metrics[f] = []
 
-    def eval(self):
-        if len(self.data["Q"]) > self.data["C"][-1]:
-            cycle_length = self.data["C"][-1]
-            self.metrics["MA"] = self.data["AFR"][-cycle_length:]/cycle_length;
-            self.metrics["MD"] = self.data["DFR"][-cycle_length:]/cycle_length;
+    def evaluate_data(self):
+        # if len(self.data["Q"]) > self.data["C"][-1]:
+        cycle_length = self.data["C"][-1]
+        self.metrics["MA"].append(sum(self.data["AFR"][-cycle_length:]));
+        self.metrics["MD"].append(sum(self.data["DFR"][-cycle_length:]));
 
-            self.metrics["I"] = np.std(self.data["AFR"])/self.metrics["MA"]
+        if self.metrics["MA"][-1] != 0:
+            self.metrics["I"].append(np.std(self.data["AFR"])/self.metrics["MA"][-1])
 
             x = .6
-            self.metrics["QO"] = ( (2*x-1)*self.metrics["I"] ) / (2*(1-x))
+            self.metrics["QO"].append(( (2*x-1)*self.metrics["I"][-1] ) / (2*(1-x)))
+        else:
+            self.metrics["I"].append(0)
+            self.metrics["QO"].append(0)
 
-        if self.data["DFR"][-1] != 0:
-            self.metrics["FR"] = self.data["AFR"][-1]/self.data["DFR"][-1]
+        if self.metrics["MD"][-1] != 0:
+            self.metrics["FR"].append(self.metrics["MA"][-1]/self.metrics["MD"][-1])
+        else:
+            self.metrics["FR"].append(0)
 
     """
     Region Weights
@@ -227,7 +273,7 @@ class Intersection():
     Times can't be < Yellow Clearance Interval
     """
     def alter_times(self):
-        new_cycle_times = intersection_control.run(self.tick, self.data, self.metrics, self.cycle_times)
+        new_cycle_times = intersection_control.run(self.time, self)
         try:
             if new_cycle_times.keys() != self.roads.keys():
                 raise ValueError('Roads do not match.', set(new_cycle_times.keys()).symmetric_difference(set(self.roads.keys())))

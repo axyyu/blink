@@ -26,6 +26,9 @@ class Road():
     def __repr__(self):
         return "{}_{}".format(self.name, str(self.id)[:5])
 
+    def set_intersection(self, i):
+        self.intersection = i
+
     """
     Init
     """
@@ -54,9 +57,9 @@ class Road():
         """
         if day >= 0:
             self.inject_rate = self.am_inject_rate * day
-            self.exit_rate = .1 * day
+            self.exit_rate = .01 * day
         else:
-            self.inject_rate = .1 * abs(day)
+            self.inject_rate = .01 * abs(day)
             self.exit_rate = self.pm_exit_rate * abs(day)
 
     """
@@ -111,6 +114,7 @@ class Road():
         my_front = self.detect_front()
         if target_lane and my_front:
             target.queue[target_lane][target.length-1] = self.queue[my_front][0]
+            # TODO: setup car passing over
             self.queue[my_front][0] = 0
 
     """

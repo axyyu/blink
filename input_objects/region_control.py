@@ -9,5 +9,5 @@ Returns dict with intersections
 Keys - intersections
 Value - multiplier
 """
-def run(time, metrics, intersections):
+def run(time, region):
     return None
