@@ -81,7 +81,6 @@ class Region():
         for f in self.metrics:
             value = 0
             for id, intersection in self.intersections.items():
-                # print(intersection.metrics, intersection.data)
                 if f != "HDI":
                     if len(intersection.metrics[f[1:]]) > 0:
                         value += intersection.metrics[f[1:]][-1]
@@ -89,7 +88,6 @@ class Region():
                     if len(intersection.metrics["FR"]) > 1:
                         if intersection.metrics["FR"][-1] > 1:
                             value += 1
-            # print(f, self.metrics[f])
             if f != "HDI":
                 self.metrics[f].append(value / self.size)
             else:

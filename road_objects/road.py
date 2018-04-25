@@ -9,6 +9,7 @@ class Road():
     def __init__(self, name, length, lanes, yellow_clearance, am_inject_rate, pm_exit_rate):
         self.id = uuid.uuid4()
         self.name = name
+        self.intersection = None
 
         self.length = length
         self.lanes = lanes
@@ -110,12 +111,12 @@ class Road():
         return None
 
     def pass_vehicles(self, target):
-        target_lane = target.detect_back()
-        my_front = self.detect_front()
-        if target_lane and my_front:
-            target.queue[target_lane][target.length-1] = self.queue[my_front][0]
-            # TODO: setup car passing over
-            self.queue[my_front][0] = 0
+        if self.length:
+            target_lane = target.detect_back()
+            my_front = self.detect_front()
+            if target_lane and my_front:
+                target.queue[target_lane][target.length-1] = self.queue[my_front][0]
+                self.queue[my_front][0] = 0
 
     """
     Vehicle Injection and Removal

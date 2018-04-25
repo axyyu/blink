@@ -26,4 +26,8 @@ Initalizes and runs the simulation.
 Edit under here to run the simulation multiple times.
 """
 sim = BlinkSimulation(network, cp.get("DEFAULT","sim_length"), cp.get("DEFAULT","tick_delay"))
-sim.start()
+output = sim.start()
+with open("./sim_output/output.pickle", "wb") as f:
+    pickle.dump(output, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+cprint("Data saved.", "yellow")

@@ -34,7 +34,7 @@ class Intersection():
     metrics - dictionary of various calculations
     """
 
-    def __init__(self, name, region_com):
+    def __init__(self, name, coords, region_com):
         """
         Initializes the intersection.
 
@@ -42,6 +42,7 @@ class Intersection():
         name - name of the intersection
         """
         self.id = uuid.uuid4()
+        self.coords = coords
         self.name = name
 
         # Communication with simulation and regions
@@ -107,8 +108,6 @@ class Intersection():
         for r in self.roads:
             if "enter" in self.roads[r]:
                 print(self.roads[r]["enter"].length)
-        # pprint(self.data)
-        # pprint(self.metrics)
 
     def time_multiplier(self, sec):
         return np.sin(sec * (np.pi/1800))
@@ -120,7 +119,11 @@ class Intersection():
     def attach_road(self, option, road):
         if road.name not in self.roads:
             self.roads[road.name] = {}
-        self.roads[road.name][option] = road
+
+        if option not in self.roads[road.name]:
+            self.roads[road.name][option] = []
+
+        self.roads[road.name][option].append(road)
 
     """
     Light management
@@ -135,8 +138,9 @@ class Intersection():
         for k,r in self.roads.items():
             yellow_times = [3]
             for _,n in r.items():
-                if n.yellow_clearance:
-                    yellow_times.append(n.yellow_clearance)
+                for road in n:
+                    if road.yellow_clearance:
+                        yellow_times.append(road.yellow_clearance)
             self.yellow_clearance[k] = max(yellow_times)
 
         self.light_dir = list(self.lights.keys())
@@ -162,28 +166,31 @@ class Intersection():
     """
     Handle Cars
     """
-    def alert(self, tick, num):
+    def alert(self, num):
         self.arrivals += num
 
     def update_cars(self):
         for r in self.roads:
             car_count = 0
             if "enter" in self.roads[r]:
-                self.roads[r]["enter"].update()
+                for road in self.roads[r]["enter"]:
+                    road.update()
                 if self.lights[r] == 1 or self.lights[r] == 0:
-                    if self.roads[r]["enter"].pass_vehicles(self.roads[r]["exit"]):
-                        self.departures += car_count
-            try:
-                self.roads[r]["exit"].intersection.alert(car_count)
-            except:
-                pass
+                    exit_roads = [e for e in self.roads[r]["exit"] if e.id != road.id]
+                    for l in range(road.lanes):
+                        e = random.choice(exit_roads)
+                        if road.pass_vehicles(e):
+                            self.departures += car_count
+                        if e.intersection:
+                            e.intersection.alert(car_count)
 
     def simulate_cars(self):
         for r in self.roads:
             if "enter" in self.roads[r]:
-                inject, exit = self.roads[r]["enter"].randomly_inject(self.time)
-                self.arrivals += inject
-                self.departures += exit
+                for road in self.roads[r]["enter"]:
+                    inject, exit = road.randomly_inject(self.time)
+                    self.arrivals += inject
+                    self.departures += exit
 
     """
     Data Collection
@@ -212,7 +219,8 @@ class Intersection():
         queue_length = 0
         for r in self.roads:
             if "enter" in self.roads[r]:
-                queue_length = self.roads[r]["enter"].count_vehicles()
+                for road in self.roads[r]["enter"]:
+                    queue_length += road.count_vehicles()
         self.data["Q"].append(queue_length)
         self.data["C"].append(sum([self.cycle_times[r] for r in self.cycle_times]))
 

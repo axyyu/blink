@@ -1,5 +1,6 @@
 from dependencies import *
 from road_objects import *
+from pprint import pprint
 
 #####################################################################
 #       Blink Simulation
@@ -41,26 +42,30 @@ class BlinkSimulation():
     def start(self):
         """
         Begins the simulation.
+
+        Returns:
+        data - data from simulation
         """
         self.create_network()
         self.init()
         self.simulate()
-        self.display()
+        return self.output()
 
     def create_network(self):
         """
         Creates all intersection and region objects based on the network dictionary.
         """
-        self.region = Region()
+        self.region = Region("DC")
 
         intersection_objects = {}
         for i,v in tqdm(self.network.items(), desc="Populating Intersections"):
             if i not in intersection_objects:
-                intersection = Intersection(v["name"], self.region.intersection_weights)
+                intersection = Intersection(v["name"], i, self.region.intersection_weights)
                 self.region.add_intersection(intersection.id,intersection)
                 intersection_objects[i] = intersection
 
         for i,v in tqdm(self.network.items(), desc="Populating Roads"):
+
             for r in v["roads"]:
                 r.keys()
                 road = Road(r["name"], r["length"], r["lanes"], r["yellow_clearance"], r["am_inject_rate"], r["pm_exit_rate"])
@@ -71,7 +76,6 @@ class BlinkSimulation():
                     intersection_objects[r["end"]].attach_road("enter", road)
                     road.set_intersection(intersection_objects[r["end"]])
 
-        self.objects.append(self.region)
         for i,v in tqdm(intersection_objects.items(), desc="Appending objects"):
             self.objects.append(v)
 
@@ -81,6 +85,7 @@ class BlinkSimulation():
         """
         for t in self.objects:
             t.init()
+        self.region.init()
 
     #####################################################################
     #      SIMULATION
@@ -114,6 +119,8 @@ class BlinkSimulation():
         for t in self.objects:
             t.tick = self.tick
             t.run()
+        self.region.tick = self.tick
+        self.region.run()
 
     def eval(self):
         """
@@ -121,6 +128,7 @@ class BlinkSimulation():
         """
         for t in self.objects:
             t.eval()
+        self.region.eval()
 
     def process(self):
         """
@@ -128,19 +136,32 @@ class BlinkSimulation():
         """
         for t in self.objects:
             t.process()
+        self.region.process()
 
     def status(self):
         """
-        Prints the status of the region.
+        Prints the status of the simulation.
         """
         self.region.status()
 
     #####################################################################
-    #      Results
+    #      RESULTS
     #####################################################################
-    def display(self):
+
+    def output(self):
         """
-        Displays a graph of each metric's change throughout the simulation.
-        Provides data on the performance of the algorithm and model.
+        Outputs the data from the simulation.
+
+        Returns:
+        data - data from simulation
         """
-        pass
+        data = {}
+        data["tick_limit"] = self.tick_limit
+        
+        data[self.region.name] = self.region.metrics;
+
+        name_to_id = {} # TODO: what if two intersections with the same name appear?
+        for t in self.objects:
+            data[t.id] = (t.name, t.coords, t.data, t.metrics)
+
+        return data
