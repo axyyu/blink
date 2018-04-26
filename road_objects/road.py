@@ -48,7 +48,7 @@ class Road():
                         if l >= 0 and l < self.lanes:
                             if self.queue[l][slot-1] == 0:
                                 self.queue[l][slot-1] = self.queue[lane][slot]
-                                self.queue[lane][slot] == 0
+                                self.queue[lane][slot] = 0
                                 break
 
     def setup_ratios(self, day):

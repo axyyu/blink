@@ -83,9 +83,14 @@ class BlinkSimulation():
         """
         Initializes every intersection and region under the simulation.
         """
+        cprint("\nInitializing Network...\n","yellow")
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            # a = [executor.submit(t.init()) for t in self.objects]
+
         for t in self.objects:
             t.init()
         self.region.init()
+        cprint("\nFinished initialization. Simulation\n","yellow")
 
     #####################################################################
     #      SIMULATION
@@ -102,9 +107,9 @@ class BlinkSimulation():
             start_time = time.time()
 
             self.run()
-            self.eval()
-            self.process()
-            self.status()
+            # self.eval()
+            # self.process()
+            # self.status()
 
             print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -157,8 +162,8 @@ class BlinkSimulation():
         """
         data = {}
         data["tick_limit"] = self.tick_limit
-        
-        data[self.region.name] = self.region.metrics;
+
+        data["region"] = self.region.metrics;
 
         name_to_id = {} # TODO: what if two intersections with the same name appear?
         for t in self.objects:
