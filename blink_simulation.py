@@ -76,6 +76,11 @@ class BlinkSimulation():
                     intersection_objects[r["end"]].attach_road("enter", road)
                     road.set_intersection(intersection_objects[r["end"]])
 
+            if "4th St SW" in v["name"] and "E St SW" in v["name"]:
+                print("\n")
+                print(v["name"])
+                print(intersection_objects[i].roads)
+
         for i,v in tqdm(intersection_objects.items(), desc="Appending objects"):
             self.objects.append(v)
 

@@ -19,7 +19,8 @@ permitted_road_types = [
     "STREET",
     "ROAD",
     "AVENUE",
-    "DRIVE"
+    "DRIVE",
+    "ALLEY"
 ]
 name_index = 9
 type_index = 14
@@ -43,27 +44,37 @@ def obtain_shapefile_data():
 #       INTERSECTIONS
 #####################################################################
 
+def add_point(int_map, p, r):
+    road_name = records[r][name_index] + " " + records[r][quad_index]
+    if p not in int_map:
+        int_map[p] = {
+            "road_ids": set(),
+            "road_names": set(),
+            "roads": []
+        }
+
+    int_map[p]["road_ids"].add(r)
+    int_map[p]["road_names"].add(road_name)
+
 def find_intersections():
     """
     Finds intersections between road vectors.
     """
-    intersection_map = {}
+    int_map = {}
     for r in tqdm(range(len(shapes)), desc="Finding Intersections"):
-        road_name = records[r][name_index] + " " + records[r][quad_index]
         road_type = records[r][type_index]
+        dir_type = records[r][dir_index]
 
         if road_type in permitted_road_types:
+            # if dir_type == "One way (Against digitizing direction)":
+            #     add_point(int_map, shapes[r].points[-1],r)
+            # elif dir_type == "One way (Digitizing direction)":
+            #     add_point(int_map, shapes[r].points[0],r)
+            # else:
             for p in shapes[r].points:
-                if p not in intersection_map:
-                    intersection_map[p] = {
-                        "road_ids": set(),
-                        "road_names": set(),
-                        "roads": []
-                    }
+                add_point(int_map, p, r)
 
-                intersection_map[p]["road_ids"].add(r)
-                intersection_map[p]["road_names"].add(road_name)
-    return intersection_map
+    return int_map
 
 def filter_intersections(int_map):
     """
@@ -122,10 +133,18 @@ def add_road(filtered_map, road_id, start, end):
 
 def find_end(int_map, filtered_map, start_id, road_id, count):
     """
-    Finds the end of the road recursively (used if intersections are removed).
+    Finds the end of the road.
     """
     if count > 3:
         return None
+
+    # p_index = shapes[road_id].index(start_id)
+    # if p_index == 0:
+    #     if shapes[road_id][-1] in filtered_map:
+    #         return p
+    # elif p_index == len(shapes[road_id])-1:
+    #     if shapes[road_id][0] in filtered_map:
+    #         return p
 
     for p in shapes[road_id].points:
         if p != start_id:
