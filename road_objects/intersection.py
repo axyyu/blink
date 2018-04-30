@@ -174,15 +174,15 @@ class Intersection():
             car_count = 0
             if "enter" in self.roads[r]:
                 for road in self.roads[r]["enter"]:
+                    if self.lights[r] == 1 or self.lights[r] == 0:
+                        exit_roads = [e for e in self.roads[r]["exit"] if e.id != road.id]
+                        for l in range(road.lanes):
+                            e = random.choice(exit_roads)
+                            if road.pass_vehicles(e):
+                                self.departures += car_count
+                            if e.intersection:
+                                e.intersection.alert(car_count)
                     road.update()
-                if self.lights[r] == 1 or self.lights[r] == 0:
-                    exit_roads = [e for e in self.roads[r]["exit"] if e.id != road.id]
-                    for l in range(road.lanes):
-                        e = random.choice(exit_roads)
-                        if road.pass_vehicles(e):
-                            self.departures += car_count
-                        if e.intersection:
-                            e.intersection.alert(car_count)
 
     def simulate_cars(self):
         for r in self.roads:

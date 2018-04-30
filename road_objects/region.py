@@ -63,7 +63,7 @@ class Region():
     ASMAD - Average SMAD
     ASMAA - Average SMAA
 
-    HDI - Number of high density intersections
+    HVI - Number of high density intersections
     """
     def init_eval(self):
         fields = [
@@ -71,7 +71,7 @@ class Region():
         "AMD",
         "AFR",
         "AQO",
-        "HDI"
+        "HVI"
         ]
         for f in fields:
             self.metrics[f] = []
@@ -81,14 +81,14 @@ class Region():
         for f in self.metrics:
             value = 0
             for id, intersection in self.intersections.items():
-                if f != "HDI":
+                if f != "HVI":
                     if len(intersection.metrics[f[1:]]) > 0:
                         value += intersection.metrics[f[1:]][-1]
                 else:
-                    if len(intersection.metrics["FR"]) > 1:
-                        if intersection.metrics["FR"][-1] > 1:
+                    if len(intersection.data["Q"]) > 0:
+                        if intersection.data["Q"][-1] > 30:
                             value += 1
-            if f != "HDI":
+            if f != "HVI":
                 self.metrics[f].append(value / self.size)
             else:
                 self.metrics[f].append(value)

@@ -112,9 +112,9 @@ class BlinkSimulation():
             start_time = time.time()
 
             self.run()
-            # self.eval()
-            # self.process()
-            # self.status()
+            self.eval()
+            self.process()
+            self.status()
 
             print("--- %s seconds ---" % (time.time() - start_time))
 

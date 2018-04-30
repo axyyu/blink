@@ -20,7 +20,6 @@ permitted_road_types = [
     "ROAD",
     "AVENUE",
     "DRIVE",
-    "ALLEY"
 ]
 name_index = 9
 type_index = 14
