@@ -18,3 +18,9 @@ sample_network/shapefiles/
 sample_network/FCPS_shapefile/
 
 sample_network/DC_shapefile/
+
+sim_output/output\.pickle
+
+random_seed/random_numbers
+
+random_seed/random_numbers\.txt

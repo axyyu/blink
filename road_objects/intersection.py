@@ -1,5 +1,6 @@
 from dependencies import *
 from input_objects import intersection_control
+from random_seed import blink_generate
 from person_objects import *
 
 #####################################################################
@@ -177,7 +178,7 @@ class Intersection():
                     if self.lights[r] == 1 or self.lights[r] == 0:
                         exit_roads = [e for e in self.roads[r]["exit"] if e.id != road.id]
                         for l in range(road.lanes):
-                            e = random.choice(exit_roads)
+                            e = exit_roads[ int(blink_generate.next_number()*len(exit_roads)) ]
                             if road.pass_vehicles(e):
                                 self.departures += car_count
                             if e.intersection:

@@ -1,5 +1,6 @@
 from dependencies import *
 from blink_simulation import BlinkSimulation
+from random_seed import blink_generate
 from configparser import ConfigParser
 import pickle
 
@@ -19,6 +20,7 @@ network_dir = cp.get("DEFAULT","network_file")
 with open(network_dir, "rb") as f:
     network = pickle.load(f)
 
+blink_generate.setup_generator() # Used for random number access to speed up the simulation
 
 """
 Initalizes and runs the simulation.

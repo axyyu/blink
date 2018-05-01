@@ -4,6 +4,7 @@ Road Object
 """
 from dependencies import *
 from person_objects import *
+from random_seed import blink_generate as bg
 
 class Road():
     def __init__(self, name, length, lanes, yellow_clearance, am_inject_rate, pm_exit_rate):
@@ -44,7 +45,10 @@ class Road():
         for lane in range(self.lanes):
             for slot in range(1, self.length):
                 if self.queue[lane][slot] != 0:
-                    for l in random.sample([lane, lane-1, lane+1], 3):
+                    possible_lanes = [lane, lane-1, lane+1]
+
+                    for n in range(3):
+                        possible_lanes.pop(int(bg.next_number()*len(possible_lanes)))
                         if l >= 0 and l < self.lanes:
                             if self.queue[l][slot-1] == 0:
                                 self.queue[l][slot-1] = self.queue[lane][slot]
@@ -66,10 +70,18 @@ class Road():
     """
     Road Detection Info
     """
+    def random_lanes(self):
+        possible_lanes = list(range(self.lanes))
+        lane_order = [
+            possible_lanes.pop(int(bg.next_number()*len(possible_lanes)))
+            for n in range(self.lanes)
+            ]
+        return lane_order
+
     def count_vehicles(self):
         count = 0
         if self.length:
-            for lane in random.sample(range(self.lanes), self.lanes):
+            for lane in self.random_lanes():
                 if self.queue[lane][self.length-1] != 0:
                     count+=1
             return count
@@ -78,7 +90,7 @@ class Road():
     """ Returns open lane """
     def detect_back(self):
         if self.length:
-            for lane in random.sample(range(self.lanes), self.lanes):
+            for lane in self.random_lanes():
                 if self.queue[lane][self.length-1] == 0:
                     return lane
             return None
@@ -87,7 +99,7 @@ class Road():
     """ Returns front lane """
     def detect_front(self):
         if self.length:
-            for lane in random.sample(range(self.lanes), self.lanes):
+            for lane in self.random_lanes():
                 if self.queue[lane][0] != 0:
                     return lane
             return None
@@ -104,8 +116,13 @@ class Road():
 
     def remove_vehicle(self):
         if self.length:
-            for lane in random.sample(range(self.lanes), self.lanes):
-                for slot in random.sample(range(self.length), self.length):
+            for lane in self.random_lanes():
+                possible_slots = list(range(self.length))
+                lane_order = [
+                    possible_slots.pop(int(bg.next_number()*len(possible_slots)))
+                    for n in range(self.length)
+                    ]
+                for slot in possible_slots:
                     if self.queue[lane][slot] != 0:
                         self.queue[lane][slot] == 0
         return None
@@ -126,10 +143,10 @@ class Road():
 
         inject = exit = 0
         if self.length:
-            if random.random() < self.exit_rate:
+            if bg.next_number() < self.exit_rate:
                 self.remove_vehicle()
                 exit+=1
-            if random.random() < self.inject_rate:
+            if bg.next_number() < self.inject_rate:
                 self.add_vehicle()
                 inject+=1
         return inject, exit
