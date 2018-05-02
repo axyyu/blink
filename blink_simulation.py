@@ -101,6 +101,10 @@ class BlinkSimulation():
     #      SIMULATION
     #####################################################################
 
+    def time_multiplier(self, tick):
+        period = np.pi/(self.tick_limit/4)
+        return np.sum([ (2*np.sin(k*period*tick)) / (k*np.pi*(-1)**(k+1)) for k in range(1,5)])
+        
     def simulate(self):
         """
         Simulates the traffic network.
@@ -126,8 +130,10 @@ class BlinkSimulation():
         """
         Simulates the passage of vehicles and pedestrians in each intersection.
         """
+        time = self.time_multiplier(self.tick)
         for t in self.objects:
             t.tick = self.tick
+            t.time = time
             t.run()
         self.region.tick = self.tick
         self.region.run()

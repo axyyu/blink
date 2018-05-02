@@ -44,6 +44,7 @@ class Intersection():
         self.id = uuid.uuid4()
         self.coords = coords
         self.name = name
+        self.time = 0
 
         # Communication with simulation and regions
         self.tick = 0
@@ -82,7 +83,7 @@ class Intersection():
 
     def run(self):
         self.inner_tick+=1
-        self.time = self.time_multiplier(self.tick)
+
 
         # Manages Cars
         self.update_lights()
@@ -108,9 +109,6 @@ class Intersection():
         for r in self.roads:
             if "enter" in self.roads[r]:
                 print(self.roads[r]["enter"].length)
-
-    def time_multiplier(self, sec):
-        return np.sin(sec * (np.pi/1800))
 
     """
     Attaching Roads
@@ -232,7 +230,8 @@ class Intersection():
 
     I - Variance of Number of Arrivals/MA
 
-    FR - Flow Ratio (AFR/DFR)
+    AFR - Flow Ratio (AFR/DFR)
+    DFR - Flow Ratio (DFR/AFR)
 
     QO - Queue Overflow Estimate [(2x-1)I]/[2(1-x)] x>=.5
     """

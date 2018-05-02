@@ -9,6 +9,7 @@ class Region():
     def __init__(self, name="Region"):
         self.id = uuid.uuid4()
         self.name = name
+        self.time = 0
 
         self.tick = 0 # Receive ticks from simulation
         self.intersections = {} # Communication with int
@@ -32,7 +33,7 @@ class Region():
         return self.intersection_weights
 
     def run(self):
-        self.time = self.time_multiplier(self.tick)
+        pass
 
     def eval(self):
         # Data Evaluation
@@ -49,9 +50,6 @@ class Region():
     def status(self):
         for f,v in self.metrics.items():
             print(f,v[-1])
-
-    def time_multiplier(self, sec):
-        return np.sin(sec * (np.pi/1800))
 
     """
     Evalutation
@@ -86,7 +84,7 @@ class Region():
                         value += intersection.metrics[f[1:]][-1]
                 else:
                     if len(intersection.data["Q"]) > 0:
-                        if intersection.data["Q"][-1] > 30:
+                        if intersection.data["Q"][-1] > 20:
                             value += 1
             if f != "HVI":
                 self.metrics[f].append(value / self.size)
