@@ -115,7 +115,7 @@ def add_road(filtered_map, road_id, start, end):
 
         road_type = records[road_id][type_index]
 
-        lanes = 1
+        lanes = 3
         am_inject_rate = .64
         pm_exit_rate = .7
 
