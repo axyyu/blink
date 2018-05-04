@@ -84,6 +84,11 @@ class BlinkSimulation():
         for i,v in tqdm(intersection_objects.items(), desc="Appending objects"):
             self.objects.append(v)
 
+        pprint(self.objects)
+        for o in self.objects:
+            pprint(o.roads)
+
+
     def init(self):
         """
         Initializes every intersection and region under the simulation.
