@@ -173,6 +173,7 @@ class Intersection():
             if "enter" in self.roads[r]:
                 for road in self.roads[r]["enter"]:
                     if self.lights[r] == 1 or self.lights[r] == 0:
+                        # TODO: right and left lanes
                         exit_roads = [e for e in self.roads[r]["exit"] if e.id != road.id]
                         for l in range(road.lanes):
                             e = random.choice(exit_roads)
