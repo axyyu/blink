@@ -29,7 +29,7 @@ class BlinkSimulation():
         # Tick Setup
         self.tick = 0
         self.tick_limit = int(tick_limit)
-        self.tick_delay = int(tick_delay)
+        self.tick_delay = float(tick_delay)
 
         # Network Setup
         self.network = network
@@ -85,6 +85,10 @@ class BlinkSimulation():
 
         for i,v in tqdm(intersection_objects.items(), desc="Appending objects"):
             self.objects.append(v)
+
+        # for o in self.objects:
+        #     pprint(o.roads)
+        # time.sleep(10)
 
     def init(self):
         """

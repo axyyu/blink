@@ -84,7 +84,8 @@ class Region:
                         value += intersection.metrics[f[1:]][-1]
                 else:
                     if len(intersection.data["Q"]) > 0:
-                        if intersection.data["Q"][-1] > 20:
+                        # print(intersection.data["Q"][-1])
+                        if intersection.data["Q"][-1] > 10:
                             value += 1
             if f != "HVI":
                 self.metrics[f].append(value / self.size)

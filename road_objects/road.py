@@ -110,9 +110,10 @@ class Road:
     def count_vehicles(self):
         count = 0
         if self.end_intersection:
-            for lane in random.sample(range(self.lanes), self.lanes):
-                if self.queue[lane][-1] != 0:
-                    count+=1
+            for lane in range(self.lanes):
+                for slot in range(self.length):
+                    if self.queue[lane][slot] != 0:
+                        count+=1
             return count
         return 0
 

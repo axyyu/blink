@@ -220,10 +220,13 @@ class Intersection:
         self.departures = 0
 
         queue_length = 0
+
+        # print(self)
         for r in self.roads:
             if "enter" in self.roads[r]:
                 for road in self.roads[r]["enter"]:
                     queue_length += road.count_vehicles()
+                    # print(road, road.count_vehicles())
         self.data["Q"].append(queue_length)
         self.data["C"].append(sum([self.cycle_times[r] for r in self.cycle_times]))
 
@@ -235,8 +238,7 @@ class Intersection:
 
     I - Variance of Number of Arrivals/MA
 
-    AFR - Flow Ratio (AFR/DFR)
-    DFR - Flow Ratio (DFR/AFR)
+    FR - Flow Ratio (AFR/DFR)
 
     QO - Queue Overflow Estimate [(2x-1)I]/[2(1-x)] x>=.5
     """

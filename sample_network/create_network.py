@@ -1,4 +1,5 @@
 import pickle
+import uuid
 
 
 """
@@ -7,190 +8,72 @@ Global Params
 Edit file inputs and outputs here.
 """
 output_file = "sample"
-length = 5
+length = 10
 lanes = 2
 inject_rate = .7
+yellow_clearance = 2
+
+width = 2 # Dimensions of returned network
+height = 2
 
 """
-Hardcoded Network
+Sample Network Generation
 """
 intersection_map = {}
 
-intersection_map[(0,0)] = {
-    "name": "0,0",
-    "road_ids": {},
-    "road_names": {"Road 0,0 to 1,0", "Road 0,0 to 0,1", "Road 0,0 to Nowhere", "Road 0,0 to Nowhere 2"},
-    "roads":[
-        {
-            "name": "Road 0,0 to 1,0",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (1,0)
-        },
-        {
-            "name": "Road 0,0 to 0,1",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (0,1)
-        },
-        {
-            "name": "Road 0,0 to Nowhere",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
-        },
-        {
-            "name": "Road 0,0 to Nowhere 2",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
-        }
-    ]
-}
+def valid_point(x, y):
+    if x >= 0 and x < width and y >= 0 and y < height:
+        return True
+    return False
 
-intersection_map[(0,1)] = {
-    "name": "0,1",
-    "road_ids": {},
-    "road_names": {"Road 0,1 to 1,1", "Road 0,1 to 0,0", "Road 0,1 to Nowhere", "Road 0,1 to Nowhere 2"},
-    "roads":[
-        {
-            "name": "Road 0,1 to 1,1",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (1,1)
-        },
-        {
-            "name": "Road 0,0 to 0,1",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (0,0)
-        },
-        {
-            "name": "Road 0,1 to Nowhere",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
-        },
-        {
-            "name": "Road 0,1 to Nowhere 2",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
-        }
-    ]
-}
+def add_road(name, start, end):
+    if valid_point(*end):
+        one = start
+        two = end
+        if one[0] < two[0] or one[1] < two[1]:
+            one = end
+            two = start
 
-intersection_map[(1,0)] = {
-    "name": "1,0",
-    "road_ids": {},
-    "road_names": {"Road 1,0 to 1,1", "Road 1,0 to 0,0", "Road 1,0 to Nowhere", "Road 1,0 to Nowhere 2"},
-    "roads":[
-        {
-            "name": "Road 1,0 to 1,1",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (1,1)
-        },
-        {
-            "name": "Road 0,0 to 1,0",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (0,0)
-        },
-        {
-            "name": "Road 1,0 to Nowhere",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
-        },
-        {
-            "name": "Road 1,0 to Nowhere 2",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
-        }
-    ]
-}
+        return {
+                    "id": uuid.uuid4(),
+                    "name": "Road {}".format(name),
+                    "length": length,
+                    "lanes": lanes,
+                    "am_inject_rate": inject_rate,
+                    "pm_exit_rate": inject_rate,
+                    "yellow_clearance": yellow_clearance,
+                    "start": start,
+                    "end": end
+                }
+    else:
+        return {
+                    "id": uuid.uuid4(),
+                    "name": "Road {}".format(name),
+                    "length": None,
+                    "lanes": None,
+                    "am_inject_rate": None,
+                    "pm_exit_rate": None,
+                    "yellow_clearance": None,
+                    "start": start,
+                    "end": end
+                }
 
-intersection_map[(1,1)] = {
-    "name": "1,1",
-    "road_ids": {},
-    "road_names": {"Road 1,1 to 0,1", "Road 1,1 to 1,0", "Road 1,1 to Nowhere", "Road 1,1 to Nowhere 2"},
-    "roads":[
-        {
-            "name": "Road 0,1 to 1,1",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (0,1)
-        },
-        {
-            "name": "Road 1,0 to 1,1",
-            "length": length,
-            "lanes": lanes,
-            "am_inject_rate": inject_rate,
-            "pm_exit_rate": inject_rate,
-            "yellow_clearance": 2,
-            "end": (1,0)
-        },
-        {
-            "name": "Road 1,1 to Nowhere",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
-        },
-        {
-            "name": "Road 1,1 to Nowhere 2",
-            "length": None,
-            "lanes": None,
-            "am_inject_rate": None,
-            "pm_exit_rate": None,
-            "yellow_clearance": None,
-            "end": None
+for x in range(width):
+    for y in range(height):
+        intersection_map[(x,y)] = {
+            "id": uuid.uuid4(),
+            "name": "{},{}".format(x,y),
+            "roads":[]
         }
-    ]
-}
+
+        start = (x,y)
+
+        for a in [-1, 1]:
+            end = (x+a, y)
+            intersection_map[(x,y)]["roads"].append(add_road("Y{}".format(y), start, end))
+
+            end = (x, y+a)
+            intersection_map[(x,y)]["roads"].append(add_road("X{}".format(x), start, end))
 
 with open(output_file, 'wb') as f:
     pickle.dump(intersection_map, f, protocol=pickle.HIGHEST_PROTOCOL)
