@@ -60,7 +60,7 @@ class BlinkSimulation():
         intersection_objects = {}
         for i,v in tqdm(self.network.items(), desc="Populating Intersections"):
             if i not in intersection_objects:
-                intersection = Intersection(v["name"], i, self.region.intersection_weights)
+                intersection = Intersection(v["id"], v["name"], i, self.region.intersection_weights)
                 self.region.add_intersection(intersection.id,intersection)
                 intersection_objects[i] = intersection
 
@@ -68,26 +68,23 @@ class BlinkSimulation():
 
             for r in v["roads"]:
                 r.keys()
-                road = Road(r["name"], r["length"], r["lanes"], r["yellow_clearance"], r["am_inject_rate"], r["pm_exit_rate"])
+                road = Road(**r)
 
                 intersection_objects[i].attach_road("exit", road)
 
-                if r["end"]:
+                if r["end"] in self.network:
                     intersection_objects[r["end"]].attach_road("enter", road)
                     road.set_intersection(intersection_objects[r["end"]])
 
-            if "4th St SW" in v["name"] and "E St SW" in v["name"]:
-                print("\n")
-                print(v["name"])
-                print(intersection_objects[i].roads)
+            # if "4th St SW" in v["name"] and "E St SW" in v["name"]:
+            #     print("\n")
+            #     print(v["name"])
+            #     print(intersection_objects[i].roads)
+
+        # time.sleep(10)
 
         for i,v in tqdm(intersection_objects.items(), desc="Appending objects"):
             self.objects.append(v)
-
-        pprint(self.objects)
-        for o in self.objects:
-            pprint(o.roads)
-
 
     def init(self):
         """

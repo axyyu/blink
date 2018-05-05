@@ -8,7 +8,7 @@ from person_objects import *
 # times. Tracks data on the departures and arrivals.
 #####################################################################
 
-class Intersection():
+class Intersection:
     """
     Intersection
 
@@ -34,14 +34,14 @@ class Intersection():
     metrics - dictionary of various calculations
     """
 
-    def __init__(self, name, coords, region_com):
+    def __init__(self, int_id, name, coords, region_com):
         """
         Initializes the intersection.
 
         Arguments:
         name - name of the intersection
         """
-        self.id = uuid.uuid4()
+        self.id = int_id
         self.coords = coords
         self.name = name
         self.time = 0
@@ -79,11 +79,11 @@ class Intersection():
         self.init_lights()
         self.init_data()
         self.init_eval()
+        self.init_roads()
         self.current_cycle = 0
 
     def run(self):
         self.inner_tick+=1
-
 
         # Manages Cars
         self.update_lights()
@@ -123,6 +123,16 @@ class Intersection():
 
         self.roads[road.name][option].append(road)
 
+    def init_roads(self):
+        for _,r in self.roads.items():
+            if "enter" in r:
+                for enter_road in r["enter"]:
+                    for k,r in self.roads.items():
+                        if "exit" in r:
+                            for exit_road in r["exit"]:
+                                enter_road.set_lane(exit_road)
+                    enter_road.init()
+
     """
     Light management
 
@@ -136,9 +146,10 @@ class Intersection():
         for k,r in self.roads.items():
             yellow_times = [3]
             for _,n in r.items():
-                for road in n:
-                    if road.yellow_clearance:
-                        yellow_times.append(road.yellow_clearance)
+                if _ == "enter":
+                    for road in n:
+                        if road.yellow_clearance:
+                            yellow_times.append(road.yellow_clearance)
             self.yellow_clearance[k] = max(yellow_times)
 
         self.light_dir = list(self.lights.keys())
@@ -169,19 +180,12 @@ class Intersection():
 
     def update_cars(self):
         for r in self.roads:
-            car_count = 0
             if "enter" in self.roads[r]:
                 for road in self.roads[r]["enter"]:
-                    if self.lights[r] == 1 or self.lights[r] == 0:
-                        # TODO: right and left lanes
-                        exit_roads = [e for e in self.roads[r]["exit"] if e.id != road.id]
-                        for l in range(road.lanes):
-                            e = random.choice(exit_roads)
-                            if road.pass_vehicles(e):
-                                self.departures += car_count
-                            if e.intersection:
-                                e.intersection.alert(car_count)
                     road.update()
+                    if self.lights[r] == 1 or self.lights[r] == 0:
+                        passed_count = road.pass_vehicles()
+                        self.departures += passed_count
 
     def simulate_cars(self):
         for r in self.roads:

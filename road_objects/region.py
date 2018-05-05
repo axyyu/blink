@@ -5,7 +5,7 @@ Region Object
 from dependencies import *
 from input_objects import region_control
 
-class Region():
+class Region:
     def __init__(self, name="Region"):
         self.id = uuid.uuid4()
         self.name = name
