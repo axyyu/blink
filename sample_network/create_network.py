@@ -13,8 +13,8 @@ lanes = 2
 inject_rate = .7
 yellow_clearance = 2
 
-width = 2 # Dimensions of returned network
-height = 2
+width = 3 # Dimensions of returned network
+height = 3
 
 """
 Sample Network Generation

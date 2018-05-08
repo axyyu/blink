@@ -123,8 +123,8 @@ class Road:
             for lane in random.sample(range(self.lanes), self.lanes):
                 if self.queue[lane][-1] == 0:
                     return lane
-            return None
-        return False
+            return False
+        return True
 
     """
     Vehicle Methods
@@ -153,10 +153,10 @@ class Road:
                         target = self.directions[direction]
                         target_lane = target.detect_back()
                         if target_lane:
-                            target.queue[target_lane][-1] = self.queue[l][0]
-                            self.queue[l][0] = 0
                             if target.end_intersection:
+                                target.queue[target_lane][-1] = self.queue[l][0]
                                 target.end_intersection.alert(1)
+                            self.queue[l][0] = 0
                             car_count += 1
         return car_count
 

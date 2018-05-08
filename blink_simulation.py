@@ -17,7 +17,7 @@ class BlinkSimulation():
     objects - list of intersection and region objects that need to be run
     """
 
-    def __init__(self, network, tick_limit, tick_delay):
+    def __init__(self, network, tick_limit, tick_delay, verbose):
         """
         Initializes a BlinkSimulation object
 
@@ -34,6 +34,8 @@ class BlinkSimulation():
         # Network Setup
         self.network = network
         self.objects = []
+
+        self.verbose = True if int(verbose) == 1 else False
 
     #####################################################################
     #      INITIALIZATION
@@ -76,19 +78,8 @@ class BlinkSimulation():
                     intersection_objects[r["end"]].attach_road("enter", road)
                     road.set_intersection(intersection_objects[r["end"]])
 
-            # if "4th St SW" in v["name"] and "E St SW" in v["name"]:
-            #     print("\n")
-            #     print(v["name"])
-            #     print(intersection_objects[i].roads)
-
-        # time.sleep(10)
-
         for i,v in tqdm(intersection_objects.items(), desc="Appending objects"):
             self.objects.append(v)
-
-        # for o in self.objects:
-        #     pprint(o.roads)
-        # time.sleep(10)
 
     def init(self):
         """
@@ -117,8 +108,8 @@ class BlinkSimulation():
         """
         cprint("\nRunning Network...\n","yellow")
 
-        for self.tick in range(self.tick_limit):
-            cprint("{}".format(self.tick), "magenta", flush=True)
+        for self.tick in tqdm(range(self.tick_limit), desc="Simulation Progress"):
+            cprint("{}".format(self.tick), "magenta", flush=True) if self.verbose else 0
             start_time = time.time()
 
             self.run()
@@ -126,7 +117,7 @@ class BlinkSimulation():
             self.process()
             self.status()
 
-            print("--- %s seconds ---" % (time.time() - start_time))
+            print("--- %s seconds ---" % (time.time() - start_time)) if self.verbose else 0
 
             time.sleep(self.tick_delay)
 
@@ -164,7 +155,7 @@ class BlinkSimulation():
         """
         Prints the status of the simulation.
         """
-        self.region.status()
+        self.region.status() if self.verbose else 0
 
     #####################################################################
     #      RESULTS
