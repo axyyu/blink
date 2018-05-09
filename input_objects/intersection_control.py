@@ -35,11 +35,12 @@ def run(time, intersection):
     for x in mRoads:
         list.append(x)
     x, y = list[0], list[1]
+    arr = []
     if compare[x] > compare[y]:
-        intersection.cycle_times[x] += 1
-        intersection.cycle_times[y] -= 1
+        arr.append(intersection.cycle_times[x] + 1)
+        arr.append(intersection.cycle_times[y] - 1)
     if compare[y] > compare[x]:
-        intersection.cycle_times[y] += 1
-        intersection.cycle_times[x] -= 1
+        arr.append(intersection.cycle_times[x] - 1)
+        arr.append(intersection.cycle_times[y] + 1)
     print(intersection.cycle_times)
-    return None
+    return arr
