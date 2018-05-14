@@ -17,6 +17,8 @@ class Road:
 
         self.directions = {}
 
+        self.leave_region_rate = 0.03
+
     def __str__(self):
         return "{} {}".format(self.name, self.queue)
 
@@ -123,8 +125,12 @@ class Road:
             for lane in random.sample(range(self.lanes), self.lanes):
                 if self.queue[lane][-1] == 0:
                     return lane
-            return False
-        return True
+        #     return False
+        # return True
+            return None
+        if random.random() < self.leave_region_rate:
+            return True
+        return False
 
     """
     Vehicle Methods

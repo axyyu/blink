@@ -135,6 +135,10 @@ class BlinkSimulation():
         self.region.tick = self.tick
         self.region.run()
 
+        # print(time)
+        # for t in self.objects:
+        #     print(t.data["Q"][-10:])
+
     def eval(self):
         """
         Collects data and calculates key traffic metrics.

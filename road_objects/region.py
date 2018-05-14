@@ -69,7 +69,8 @@ class Region:
         "AMD",
         "AFR",
         "AQO",
-        "HVI"
+        "AQ",
+        "HVI",
         ]
         for f in fields:
             self.metrics[f] = []
@@ -79,14 +80,19 @@ class Region:
         for f in self.metrics:
             value = 0
             for id, intersection in self.intersections.items():
-                if f != "HVI":
-                    if len(intersection.metrics[f[1:]]) > 0:
-                        value += intersection.metrics[f[1:]][-1]
-                else:
+                if f == "AQ":
                     if len(intersection.data["Q"]) > 0:
                         # print(intersection.data["Q"][-1])
-                        if intersection.data["Q"][-1] > 10:
+                        value+= intersection.data["Q"][-1]
+                elif f == "HVI":
+                    if len(intersection.data["Q"]) > 0:
+                        # print(intersection.data["Q"][-1])
+                        if intersection.data["Q"][-1] > 20:
                             value += 1
+                else:
+                    if len(intersection.metrics[f[1:]]) > 0:
+                        value += intersection.metrics[f[1:]][-1]
+                    
             if f != "HVI":
                 self.metrics[f].append(value / self.size)
             else:
