@@ -43,5 +43,14 @@ def run(time, intersection):
     if compare[y] > compare[x]:
         arr[x] = intersection.cycle_times[x] - 1
         arr[y] = intersection.cycle_times[y] + 1
-    #print(intersection.cycle_times, compare[x], compare[y], arr)
+    if compare[y] is compare[x]:
+        if compare[y] >= 1.5:
+            arr[x] = intersection.cycle_times[x] + 1
+            arr[y] = intersection.cycle_times[y] + 1
+        else:
+            if intersection.cycle_times[x] > 45:
+                arr[x] = intersection.cycle_times[x] - 1
+            if intersection.cycle_times[y] > 45:
+                arr[y] = intersection.cycle_times[y] - 1
+    print(intersection.cycle_times, compare[x], compare[y], arr)
     return arr
