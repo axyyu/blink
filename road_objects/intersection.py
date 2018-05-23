@@ -15,7 +15,7 @@ class Intersection:
     tick - in seconds, set by the BlinkSimulation, used to obtain time of day
     region - intersection weights determined by Region object
     roads - dictionary of roads
-        roads [ road name ] [ type(enter|exit) ] = road object
+        roads [ road name ] [ type(enter|exit) ] [ road list ]
 
     lights - dictionary of light status
         lights [ road name ] = type(-1|0|1)

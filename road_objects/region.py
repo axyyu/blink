@@ -58,8 +58,8 @@ class Region:
     AMD - Average MD
     AFR - Average FR
     AQO - Average QO
-    ASMAD - Average SMAD
-    ASMAA - Average SMAA
+
+    AQ - Average Queue Length
 
     HVI - Number of high density intersections
     """
