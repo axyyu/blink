@@ -179,13 +179,25 @@ class Intersection:
         self.arrivals += num
 
     def update_cars(self):
+        pass_status = {}
+        
         for r in self.roads:
-            if "enter" in self.roads[r]:
-                for road in self.roads[r]["enter"]:
-                    road.update()
-                    if self.lights[r] == 1 or self.lights[r] == 0:
-                        passed_count = road.pass_vehicles()
+            if self.lights[r] == 1:
+                if "enter" in self.roads[r]:
+                    # Pass straight
+                    for road in self.roads[r]["enter"]:
+                        passed_straight, passed_count = road.pass_straight()
+                        pass_status[road] = passed_straight
                         self.departures += passed_count
+
+                    # Turns
+                    for road in self.roads[r]["enter"]:
+                        for road_obj, straight_status in pass_status.items():
+                            self.departures += road.pass_turns(straight_status)
+
+                    # Updates vehicles
+                    for road in self.roads[r]["enter"]:
+                        road.update()
 
     def simulate_cars(self):
         for r in self.roads:

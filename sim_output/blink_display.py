@@ -32,7 +32,7 @@ for k,v in region_metrics.items():
 
 plt.rcParams["figure.figsize"] = [20, 40]
 plt.legend(list(region_metrics.keys()), loc='upper left')
-plt.title("Baseline")
+# plt.title("Baseline")
 plt.xlabel("Ticks (seconds)")
 plt.ylabel("Ratio")
 plt.show()

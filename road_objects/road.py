@@ -17,7 +17,7 @@ class Road:
 
         self.directions = {}
 
-        self.leave_region_rate = 0.03
+        self.leave_region_rate = 0 #0.01
 
     def __str__(self):
         return "{} {}".format(self.name, self.queue)
@@ -146,24 +146,62 @@ class Road:
             for lane in random.sample(range(self.lanes), self.lanes):
                 for slot in random.sample(range(self.length), self.length):
                     if self.queue[lane][slot] != 0:
-                        self.queue[lane][slot] == 0
+                        self.queue[lane][slot] = 0
         return None
 
-    def pass_vehicles(self):
+        #     count = 0
+        # if self.end_intersection:
+        #     for lane in self.queue:
+        #         for slot in range(len(lane)):
+        #             if lane[slot] != 0:
+        #                 if random.random() < self.exit_rate:
+        #                     lane[slot] = 0
+        #                     count += 1
+        # return count
+
+    def pass_straight(self):
+        pass_status = False
         car_count = 0
         if self.end_intersection:
             for l in range(len(self.queue)):
                 if self.queue[l][0] != 0:
                     if len(self.lane_dir[l]) > 0:
-                        direction = random.choice(self.lane_dir[l])
-                        target = self.directions[direction]
-                        target_lane = target.detect_back()
-                        if target_lane:
-                            if target.end_intersection:
-                                target.queue[target_lane][-1] = self.queue[l][0]
-                                target.end_intersection.alert(1)
-                            self.queue[l][0] = 0
-                            car_count += 1
+                        if "straight" in self.lane_dir:
+                            target = self.directions["straight"]
+                            target_lane = target.detect_back()
+                            if target_lane:
+                                if target.end_intersection:
+                                    target.queue[target_lane][-1] = self.queue[l][0]
+                                    target.end_intersection.alert(1)
+                                self.queue[l][0] = 0
+                                pass_status = True
+                                car_count += 1
+        return pass_status, car_count
+
+    def pass_turns(self, pass_status):
+        car_count = 0
+        if self.end_intersection:
+            for l in range(len(self.queue)):
+                if self.queue[l][0] != 0:
+                    if len(self.lane_dir[l]) > 0:
+                        if "right" in self.lane_dir:
+                            target = self.directions["right"]
+                            target_lane = target.detect_back()
+                            if target_lane:
+                                if target.end_intersection:
+                                    target.queue[target_lane][-1] = self.queue[l][0]
+                                    target.end_intersection.alert(1)
+                                self.queue[l][0] = 0
+                                car_count += 1
+                        if "left" in self.lane_dir and not pass_status:
+                            target = self.directions["left"]
+                            target_lane = target.detect_back()
+                            if target_lane:
+                                if target.end_intersection:
+                                    target.queue[target_lane][-1] = self.queue[l][0]
+                                    target.end_intersection.alert(1)
+                                self.queue[l][0] = 0
+                                car_count += 1
         return car_count
 
     """

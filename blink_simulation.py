@@ -135,9 +135,14 @@ class BlinkSimulation():
         self.region.tick = self.tick
         self.region.run()
 
-        # print(time)
-        # for t in self.objects:
-        #     print(t.data["Q"][-10:])
+        print(time)
+        for t in self.objects:
+            print(t)
+            for _,r in t.roads.items():
+                for _,roads in r.items():
+                    for road in roads:
+                        print(road.queue)
+            # print(t.data["Q"][-10:])
 
     def eval(self):
         """
