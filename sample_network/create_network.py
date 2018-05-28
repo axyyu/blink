@@ -9,8 +9,8 @@ Edit file inputs and outputs here.
 """
 output_file = "sample"
 length = 10
-lanes = 2
-inject_rate = .7
+lanes = 3
+inject_rate = .5
 yellow_clearance = 2
 
 width = 2 # Dimensions of returned network

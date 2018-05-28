@@ -17,7 +17,7 @@ class Road:
 
         self.directions = {}
 
-        self.leave_region_rate = 0 #0.01
+        self.leave_region_rate = 0.01
 
     def __str__(self):
         return "{} {}".format(self.name, self.queue)
@@ -100,11 +100,11 @@ class Road:
         0 - Day
         """
         if day >= 0:
-            self.inject_rate = self.am_inject_rate * day
+            self.inject_rate = self.am_inject_rate * day/2
             self.exit_rate = .01 * day
         else:
-            self.inject_rate = .01 * abs(day)
-            self.exit_rate = self.pm_exit_rate * abs(day)
+            self.inject_rate = self.pm_exit_rate * abs(day)
+            self.exit_rate = self.pm_exit_rate * abs(day/4)
 
     """
     Road Detection Info
